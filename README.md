@@ -5,6 +5,7 @@ This app enables one to upload, manage, and share files among friends.
 Integration of Google Drive API
 
 The major features include:
+
 1. Login with other social platforms. e.g. google, facebook, twitter
 2. File upload. A user can upload files into an folder
 3. Folder management 
