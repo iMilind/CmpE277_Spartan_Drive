@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/SpartanDrive.iml" filepath="$PROJECT_DIR$/SpartanDrive.iml" />
+      <module fileurl="file://$PROJECT_DIR$/CmpE277_Spartan_Drive.iml" filepath="$PROJECT_DIR$/CmpE277_Spartan_Drive.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
