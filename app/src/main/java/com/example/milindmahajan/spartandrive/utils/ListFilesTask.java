@@ -39,19 +39,24 @@ public class ListFilesTask extends AsyncTask<String, Void, ArrayList<String>> {
     private Handler handler;
 
     public ListFilesTask(Handler handler) {
+
         this.dropbox = Common.getDropboxObj();
         this.handler = handler;
     }
 
     @Override
     protected ArrayList<String> doInBackground(String... params) {
+
         ArrayList<String> fileList = new ArrayList<String>();
         try {
+
             DropboxAPI.Entry dir = dropbox.metadata(params[0], 1000, null, true, null);
             for (DropboxAPI.Entry e : dir.contents) {
+
                 fileList.add(e.fileName());
             }
         } catch (DropboxException e) {
+
             e.printStackTrace();
         }
 
@@ -60,11 +65,11 @@ public class ListFilesTask extends AsyncTask<String, Void, ArrayList<String>> {
 
     @Override
     protected void onPostExecute(ArrayList<String> result) {
+
         Message msgObj = handler.obtainMessage();
         Bundle b = new Bundle();
         b.putStringArrayList("data", result);
         msgObj.setData(b);
         handler.sendMessage(msgObj);
-
     }
 }

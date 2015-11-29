@@ -17,8 +17,7 @@ import java.io.IOException;
 /**
  * Created by Jatin on 11/28/2015.
  */
-public class FileOperations
-{
+public class FileOperations {
 
     // TODO:
     //    1. Check Network before making all these calls
@@ -28,74 +27,80 @@ public class FileOperations
     //    5. Better Pattern to execute these methods.
     //          Refer: http://stackoverflow.com/questions/7294533/passing-parameters-to-asynctask
 
-    public static void createFolder(Context context, String path)
-    {
+    public static void createFolder(Context context, String path) {
+
         Task t = new Task(context);
-        if(Common.getDropboxObj()!=null)
-        {
+        if(Common.getDropboxObj()!=null) {
+
             t.execute("CREATE", path);
         }
     }
 
-    public static void listAllFiles(Handler h, String path)
-    {
+    public static void listAllFiles(Handler h, String path) {
+
         ListFilesTask t = new ListFilesTask(h);
-        if(Common.getDropboxObj()!=null)
-        {
+        if(Common.getDropboxObj()!=null) {
+
             t.execute(path);
         }
     }
-    public static void copy(Context context, String oldPath, String newPath)
-    {
+
+    public static void copy(Context context, String oldPath, String newPath) {
+
         Task t = new Task(context);
-        if(Common.getDropboxObj()!=null)
-        {
+        if(Common.getDropboxObj()!=null) {
+
             t.execute("COPY", oldPath, newPath);
         }
     }
-    public static void move(Context context, String oldPath, String newPath)
-    {
+
+    public static void move(Context context, String oldPath, String newPath) {
+
         Task t = new Task(context);
-        if(Common.getDropboxObj()!=null)
-        {
+        if(Common.getDropboxObj()!=null) {
+
             t.execute("MOVE", oldPath, newPath);
         }
     }
-    public static void upload(Context context)
-    {
+
+    public static void upload(Context context) {
+
         Task t = new Task(context);
-        if(Common.getDropboxObj()!=null)
-        {
+        if(Common.getDropboxObj()!=null) {
+
             t.execute("UPLOAD");
         }
     }
-    public static void delete(Context context, String path)
-    {
+
+    public static void delete(Context context, String path) {
+
         Task t = new Task(context);
-        if(Common.getDropboxObj()!=null)
-        {
+        if(Common.getDropboxObj()!=null) {
+
             t.execute("DELETE", path);
         }
     }
 
-    static class Task extends AsyncTask<String, Void, Boolean>
-    {
+    static class Task extends AsyncTask<String, Void, Boolean> {
+
         private DropboxAPI<?> dropbox;
         private Context context;
         private String message = "";
 
         public Task(Context context) {
+
             this.context = context.getApplicationContext();
             dropbox = Common.getDropboxObj();
         }
+
         @Override
         protected Boolean doInBackground(String... params) {
 
-
             String method = params[0];
             try {
-                switch (method)
-                {
+
+                switch (method) {
+
                     case "COPY":
                         Log.d("FileOperation", "Copying File: " + params[1]);
                         message = "copied";
@@ -137,29 +142,33 @@ public class FileOperations
                         tempFile.delete();
                 }
             } catch (DropboxException e) {
+
                 Log.i("File Dropbox Operation", "Exception: ", e);
                 e.printStackTrace();
                 message = e.getCause().getMessage();
             }
-            catch (IOException e)
-            {
+            catch (IOException e) {
+
                 Log.i("File IO Operation", "Exception: ", e);
                 e.printStackTrace();
                 message = e.getCause().getMessage();
             }
-            return false;
 
+            return false;
         }
+
         @Override
         protected void onPostExecute(Boolean result) {
+
             if (result) {
+
                 Toast.makeText(context, "File "+ message + " sucesfully!",
                         Toast.LENGTH_LONG).show();
             } else {
+
                 Toast.makeText(context, "File operation failed: " + message, Toast.LENGTH_LONG)
                         .show();
             }
         }
     }
-
 }
