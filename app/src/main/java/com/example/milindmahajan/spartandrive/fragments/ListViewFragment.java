@@ -4,17 +4,24 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
+import android.app.Fragment;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.example.milindmahajan.spartandrive.R;
 import com.example.milindmahajan.spartandrive.model.DropboxItem;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by milind.mahajan on 11/28/15.
@@ -29,7 +36,9 @@ public class ListViewFragment extends Fragment {
     }
 
     View rootView;
-    private ArrayList<DropboxItem> searchResults = new ArrayList<DropboxItem>();
+    private ArrayList<DropboxItem> results = new ArrayList<DropboxItem>();
+    private ActionMode mActionMode;
+    private ListViewAdapter mAdapter;
 
 
     @Override
@@ -99,5 +108,103 @@ public class ListViewFragment extends Fragment {
                 listViewFragmentListener.didSelectRow("", true);
             }
         });
+    }
+
+    public void reloadListView (ArrayList<DropboxItem> dropboxItems) {
+
+        this.results.removeAll(this.results);
+        this.results.addAll(dropboxItems);
+
+        updateVideosFound();
+    }
+
+    private void updateVideosFound() {
+
+        mAdapter = new ListViewAdapter(getContext(),
+                R.layout.dropbox_item, 0, this.results);
+        ListView listView = (ListView)rootView.findViewById(R.id.list_view);
+        listView.setAdapter(mAdapter);
+    }
+
+    private class ListViewAdapter extends ArrayAdapter<DropboxItem> {
+
+        ArrayList <DropboxItem> videoList = new ArrayList<DropboxItem>();
+        ArrayList <DropboxItem> selectedFiles = new ArrayList<DropboxItem>();
+
+        public ListViewAdapter(Context context, int resource, int textViewResourceId, List <DropboxItem> objects) {
+
+            super(context, resource, textViewResourceId, objects);
+            videoList.addAll(objects);
+        }
+
+        public void setNewSelection(int position, boolean value) {
+
+            selectedFiles.add(videoList.get(position));
+            notifyDataSetChanged();
+        }
+
+        public void removeSelection(int position) {
+
+            removeFromSelection(videoList.get(position));
+            notifyDataSetChanged();
+        }
+
+        private void removeFromSelection (DropboxItem file) {
+
+            for (int i = 0; i < selectedFiles.size(); i++) {
+
+//                if (selectedFiles.get(i).getId().equals(file.getId())) {
+//
+//                    selectedFiles.remove(i);
+//                    break;
+//                }
+            }
+        }
+
+        public ArrayList <DropboxItem> getSelectedFiles () {
+
+            return this.selectedFiles;
+        }
+
+        @Override
+        public View getView(final int position, View convertView, ViewGroup parent) {
+
+            if(convertView == null) {
+
+                convertView = getActivity().getLayoutInflater().inflate(R.layout.dropbox_item, parent, false);
+            }
+
+            DropboxItem searchResult = videoList.get(position);
+
+            ImageView imageView = (ImageView)convertView.findViewById(R.id.icon);
+            TextView title = (TextView)convertView.findViewById(R.id.title);
+            CheckBox checkBox = (CheckBox)convertView.findViewById(R.id.checkBox);
+            checkBox.setVisibility(View.VISIBLE);
+
+            checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+                    if (isChecked) {
+
+                        mAdapter.setNewSelection(position, isChecked);
+                    } else {
+
+                        mAdapter.removeSelection(position);
+                    }
+
+                    if (mAdapter.getSelectedFiles().size() != 0) {
+
+//                        mActionMode = getActivity().startActionMode(new ActionBarCallBack());
+                    } else {
+
+                        mActionMode.finish();
+                    }
+                }
+            });
+
+            return convertView;
+        }
     }
 }
