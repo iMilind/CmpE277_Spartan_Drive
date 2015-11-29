@@ -29,9 +29,8 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
 
-
-
     private boolean mLoggedIn, onResume;
+
 
     private final Handler handler = new Handler() {
         public void handleMessage(Message msg) {
@@ -44,10 +43,11 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-
     private Button dropboxLogin = null;
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
         super.onActivityResult(requestCode, resultCode, data);
     }
 
