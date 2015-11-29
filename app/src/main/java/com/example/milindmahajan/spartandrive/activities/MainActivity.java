@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -18,14 +20,28 @@ import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
 import com.example.milindmahajan.spartandrive.R;
 import com.example.milindmahajan.spartandrive.utils.Common;
+import com.example.milindmahajan.spartandrive.utils.FileOperations;
 import com.example.milindmahajan.spartandrive.utils.UploadToDropbox;
 
 import java.io.File;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
 
     private boolean mLoggedIn, onResume;
+
+
+    private final Handler handler = new Handler() {
+        public void handleMessage(Message msg) {
+            ArrayList<String> result = msg.getData().getStringArrayList("data");
+            for (String fileName : result) {
+                Log.i("ListFiles", fileName);
+             /*   TextView tv = new TextView(DropboxActivity.this);
+                tv.setText(fileName);*/
+            }
+        }
+    };
 
     private Button dropboxLogin = null;
 
@@ -45,13 +61,19 @@ public class MainActivity extends AppCompatActivity {
         Common.setDropboxObj(new DropboxAPI<AndroidAuthSession>(session));
         Common.getDropboxObj().getSession().startOAuth2Authentication(MainActivity.this);
         dropboxLogin = (Button)findViewById(R.id.dropbox_update);
+
         dropboxLogin.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
 
-                        UploadToDropbox u = new UploadToDropbox(MainActivity.this, Common.getDropboxObj(), getPath());
-                        u.execute();
+                        /*UploadToDropbox u = new UploadToDropbox(MainActivity.this, Common.getDropboxObj(), getPath());
+                        u.execute();*/
+
+                        //FileOperations.copy(MainActivity.this, "/NewFolder/textfile.txt", "textfile2.txt");
+                        //FileOperations.delete(MainActivity.this,"textfile2.txt");
+                        //FileOperations.move(MainActivity.this, "/NewFolder2/textfile2.txt", "/NewFolder_Poop/samplePoop.txt");
+                        FileOperations.listAllFiles(handler,"/NewFolder_Poop");
                     }
                 }
 
