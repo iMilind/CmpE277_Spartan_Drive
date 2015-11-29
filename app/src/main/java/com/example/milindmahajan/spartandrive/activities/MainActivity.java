@@ -3,6 +3,7 @@ package com.example.milindmahajan.spartandrive.activities;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -17,6 +18,9 @@ import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
 import com.example.milindmahajan.spartandrive.R;
 import com.example.milindmahajan.spartandrive.utils.Common;
+import com.example.milindmahajan.spartandrive.utils.UploadToDropbox;
+
+import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -42,16 +46,18 @@ public class MainActivity extends AppCompatActivity {
         AndroidAuthSession session = buildSession();
         mApi = new DropboxAPI<AndroidAuthSession>(session);
         mApi.getSession().startOAuth2Authentication(MainActivity.this);
-       /* dropboxLogin = (Button)findViewById(R.id.dropbox_login);
+        dropboxLogin = (Button)findViewById(R.id.dropbox_update);
         dropboxLogin.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
 
+                        UploadToDropbox u = new UploadToDropbox(MainActivity.this, mApi, getPath());
+                        u.execute();
                     }
                 }
 
-        );*/
+        );
     }
 
     private AndroidAuthSession buildSession() {
@@ -81,6 +87,9 @@ public class MainActivity extends AppCompatActivity {
                 System.out.print(accessToken);
                 storeKeys("oauth2:", accessToken);
                 setLoggedIn(onResume);
+                String path = getPath();
+                System.out.print(path);
+
             } catch (IllegalStateException e) {
                 Log.i("DbAuthLog", "Error authenticating", e);
                 showToast("Couldn't authenticate with Dropbox:"
@@ -90,6 +99,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public static String getPath() {
+        /*String path = "";
+        if (Environment.getExternalStorageState().equals(
+                Environment.MEDIA_MOUNTED)) {
+            path = Environment.getExternalStorageDirectory().getAbsolutePath();
+        } else if ((new File("/mnt/emmc")).exists()) {
+            path = "/mnt/emmc";
+        } else {
+            path = Environment.getExternalStorageDirectory().getAbsolutePath();
+        }*/
+        //return path + "/SpartanDrive";
+        return "/SpartanDrive";
+    }
     private void showToast(String msg) {
         Toast error = Toast.makeText(this, msg, Toast.LENGTH_LONG);
         error.show();

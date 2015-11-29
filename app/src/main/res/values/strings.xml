@@ -4,5 +4,7 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="dropbox_login">Dropbox Login</string>
+    <string name="dropbox_update">Update</string>
+    <string name="dropbox_list">List</string>
     <string name="title_activity_main_ui">MainUIActivity</string>
 </resources>
