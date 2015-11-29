@@ -6,6 +6,8 @@ import android.content.DialogInterface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import com.dropbox.client2.DropboxAPI;
+import com.dropbox.client2.android.AndroidAuthSession;
 import com.dropbox.client2.session.Session;
 
 /**
@@ -16,10 +18,19 @@ public class Common
     final static public String APP_KEY = "3cne6bs9s632jnk";
     final static public String APP_SECRET = "58s3nww0d70sc0f";
 
-    final static public Session.AccessType ACCESS_TYPE = Session.AccessType.DROPBOX;
     final static public String ACCOUNT_PREFS_NAME = "prefs";
     final static public String ACCESS_KEY_NAME = "ACCESS_KEY";
     final static public String ACCESS_SECRET_NAME = "ACCESS_SECRET";
+
+    private static DropboxAPI<AndroidAuthSession> mApi;
+
+    public static DropboxAPI<AndroidAuthSession> getDropboxObj() {
+        return mApi;
+    }
+
+    public static void setDropboxObj(DropboxAPI<AndroidAuthSession> dropboxObj) {
+        mApi = dropboxObj;
+    }
 
     public static boolean isOnline(Context context) {
         ConnectivityManager cm = (ConnectivityManager) context

@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean mLoggedIn, onResume;
 
-    private DropboxAPI<AndroidAuthSession>  mApi;
+
 
     private Button dropboxLogin = null;
     @Override
@@ -44,15 +44,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         AndroidAuthSession session = buildSession();
-        mApi = new DropboxAPI<AndroidAuthSession>(session);
-        mApi.getSession().startOAuth2Authentication(MainActivity.this);
+        Common.setDropboxObj(new DropboxAPI<AndroidAuthSession>(session));
+        Common.getDropboxObj().getSession().startOAuth2Authentication(MainActivity.this);
         dropboxLogin = (Button)findViewById(R.id.dropbox_update);
         dropboxLogin.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
 
-                        UploadToDropbox u = new UploadToDropbox(MainActivity.this, mApi, getPath());
+                        UploadToDropbox u = new UploadToDropbox(MainActivity.this, Common.getDropboxObj(), getPath());
                         u.execute();
                     }
                 }
@@ -67,10 +67,9 @@ public class MainActivity extends AppCompatActivity {
         if (stored != null) {
             AccessTokenPair accessToken = new AccessTokenPair(stored[0],
                     stored[1]);
-            session = new AndroidAuthSession(appKeyPair, Common.ACCESS_TYPE,
-                    accessToken);
+            session = new AndroidAuthSession(appKeyPair,accessToken);
         } else {
-            session = new AndroidAuthSession(appKeyPair, Common.ACCESS_TYPE);
+            session = new AndroidAuthSession(appKeyPair);
         }
         return session;
     }
@@ -78,7 +77,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        if (mApi.getSession().authenticationSuccessful()) {
+        DropboxAPI<AndroidAuthSession> mApi = Common.getDropboxObj();
+        if (Common.getDropboxObj().getSession().authenticationSuccessful()) {
             try {
                 // Required to complete auth, sets the access token on the session
                 mApi.getSession().finishAuthentication();
@@ -135,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
         edit.commit();
     }
     private void logOut() {
-        mApi.getSession().unlink();
+        Common.getDropboxObj().getSession().unlink();
 
         clearKeys();
     }
