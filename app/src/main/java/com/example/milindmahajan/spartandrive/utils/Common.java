@@ -15,8 +15,8 @@ import com.dropbox.client2.session.Session;
  */
 public class Common
 {
-    final static public String APP_KEY = "3cne6bs9s632jnk";
-    final static public String APP_SECRET = "58s3nww0d70sc0f";
+    final static public String APP_KEY = "ng6nw88gthunoyx";
+    final static public String APP_SECRET = "qlh6xb7urnhcw6m";
 
     final static public String ACCOUNT_PREFS_NAME = "prefs";
     final static public String ACCESS_KEY_NAME = "ACCESS_KEY";
