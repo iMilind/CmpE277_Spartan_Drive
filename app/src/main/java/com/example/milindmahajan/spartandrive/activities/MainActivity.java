@@ -10,6 +10,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dropbox.client2.DropboxAPI;
@@ -17,13 +26,17 @@ import com.dropbox.client2.android.AndroidAuthSession;
 import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
 import com.example.milindmahajan.spartandrive.R;
-import com.example.milindmahajan.spartandrive.fragments.ListViewFragment;
 import com.example.milindmahajan.spartandrive.utils.Common;
 import com.example.milindmahajan.spartandrive.utils.FileOperations;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements ListViewFragment.ListViewFragmentListener {
+public class MainActivity extends AppCompatActivity {
+
+    private ArrayList<String> results = new ArrayList<String>();
+    private ListViewAdapter listViewAdapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +47,11 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
         AndroidAuthSession session = buildSession();
         Common.setDropboxObj(new DropboxAPI<AndroidAuthSession>(session));
         Common.getDropboxObj().getSession().startOAuth2Authentication(MainActivity.this);
+
+        ListView listView = (ListView)findViewById(R.id.list_view);
+        listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+
+        addClickListener();
     }
 
     @Override
@@ -61,6 +79,23 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
         super.onActivityResult(requestCode, resultCode, data);
     }
+
+
+    private void addClickListener(){
+
+        ListView listView = (ListView)findViewById(R.id.list_view);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> av, View v, int pos,
+                                    long id) {
+
+                System.out.println("onItemClick Adapter View Favorite fragment");
+//                String videoId = searchResults.get(pos).getId();
+            }
+        });
+    }
+
 
     private boolean mLoggedIn, onResume;
 
@@ -181,19 +216,63 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
             ArrayList<String> result = msg.getData().getStringArrayList("data");
 
-            Context con = getApplicationContext();
-            ListViewFragment listViewFragment = (ListViewFragment)getFragmentManager().findFragmentById(R.id.listViewFragment);
-            listViewFragment.reloadListView(result, con);
-            System.out.println("Dropbox GET result "+result);
-            for (String fileName : result) {
-
-                System.out.println("Dropbox item " + fileName);
-            }
+            reloadListView(result);
         }
     };
 
-    public void didSelectRow(String id, boolean isFile) {
+    public void reloadListView (ArrayList<String> dropboxItems) {
 
-        System.out.println("Selected id is "+id);
+        this.results.removeAll(this.results);
+        this.results.addAll(dropboxItems);
+
+        reloadData(this.results);
+    }
+
+    private void reloadData(ArrayList <String> dropboxItems) {
+
+        listViewAdapter = new ListViewAdapter(getApplicationContext(),
+                R.layout.dropbox_item, 0, dropboxItems);
+
+
+        ListView listView = (ListView)findViewById(R.id.list_view);
+        listView.setAdapter(listViewAdapter);
+    }
+
+    private class ListViewAdapter extends ArrayAdapter<String> {
+
+        ArrayList <String> dropboxItems = new ArrayList<String>();
+
+        public ListViewAdapter(Context context, int resource, int textViewResourceId, List<String> objects) {
+
+            super(context, resource, textViewResourceId, objects);
+            this.dropboxItems.addAll(objects);
+        }
+
+        @Override
+        public View getView(final int position, View convertView, ViewGroup parent) {
+
+            if(convertView == null) {
+
+                convertView = MainActivity.this.getLayoutInflater().inflate(R.layout.dropbox_item, parent, false);
+            }
+
+            String searchResult = this.dropboxItems.get(position);
+
+            ImageView imageView = (ImageView)convertView.findViewById(R.id.icon);
+            TextView title = (TextView)convertView.findViewById(R.id.title);
+            title.setText(searchResult);
+            CheckBox checkBox = (CheckBox)convertView.findViewById(R.id.checkBox);
+            checkBox.setVisibility(View.VISIBLE);
+
+            checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+                }
+            });
+
+            return convertView;
+        }
     }
 }
