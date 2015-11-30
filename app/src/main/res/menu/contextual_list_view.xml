@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:yourapp="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/item_delete"
+        android:icon="@android:drawable/ic_menu_delete"
+        yourapp:showAsAction="always"
+        android:titleCondensed="Delete"
+        android:title="Delete">
+    </item>
+
+    <item
+        android:id="@+id/item_share"
+        android:icon="@android:drawable/ic_menu_share"
+        yourapp:showAsAction="always"
+        android:titleCondensed="Share"
+        android:title="Share">
+    </item>
+
+    <item
+        android:id="@+id/item_download"
+        android:icon="@android:drawable/ic_menu_save"
+        yourapp:showAsAction="ifRoom"
+        android:titleCondensed="Download"
+        android:title="Download">
+    </item>
+
+    <item
+        android:id="@+id/item_move"
+        android:icon="@drawable/move"
+        yourapp:showAsAction="ifRoom"
+        android:titleCondensed="Move"
+        android:title="Move">
+    </item>
+
+    <item
+        android:id="@+id/item_copy"
+        android:icon="@drawable/copy"
+        yourapp:showAsAction="ifRoom"
+        android:titleCondensed="Copy"
+        android:title="Copy">
+    </item>
+
+</menu>

@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ArrayList<String> results = new ArrayList<String>();
     private ListViewAdapter listViewAdapter;
+    private ActionMode actionMode;
 
 
     @Override
@@ -162,9 +164,6 @@ public class MainActivity extends AppCompatActivity {
         if (loggedIn) {
 
             onResume = false;
-        } else {
-
-            FileOperations.listAllFiles(handler, "/SpartanDrive");
         }
     }
 
@@ -241,11 +240,41 @@ public class MainActivity extends AppCompatActivity {
     private class ListViewAdapter extends ArrayAdapter<String> {
 
         ArrayList <String> dropboxItems = new ArrayList<String>();
+        ArrayList <String> selectedFiles = new ArrayList<String>();
 
         public ListViewAdapter(Context context, int resource, int textViewResourceId, List<String> objects) {
 
             super(context, resource, textViewResourceId, objects);
             this.dropboxItems.addAll(objects);
+        }
+
+        public void setNewSelection(int position, boolean value) {
+
+            selectedFiles.add(dropboxItems.get(position));
+            notifyDataSetChanged();
+        }
+
+        public void removeSelection(int position) {
+
+            removeFromSelection(dropboxItems.get(position));
+            notifyDataSetChanged();
+        }
+
+        private void removeFromSelection (String stringPath) {
+
+            for (int i = 0; i < selectedFiles.size(); i++) {
+
+                if (selectedFiles.get(i).equals(stringPath)) {
+
+                    selectedFiles.remove(i);
+                    break;
+                }
+            }
+        }
+
+        public ArrayList <String> getSelectedFiles () {
+
+            return this.selectedFiles;
         }
 
         @Override
@@ -269,10 +298,70 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
+                    if(isChecked) {
+
+                        listViewAdapter.setNewSelection(position, isChecked);
+                    }
+                    else {
+
+                        listViewAdapter.removeSelection(position);
+                    }
+
+                    if (listViewAdapter.getSelectedFiles().size() != 0) {
+
+                        actionMode = MainActivity.this.startActionMode(new ActionBarCallBack());
+                    } else {
+
+                        actionMode.finish();
+                    }
                 }
             });
 
             return convertView;
+        }
+    }
+
+
+    class ActionBarCallBack implements ActionMode.Callback {
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+
+            switch (item.getItemId()) {
+
+                case R.id.item_delete:
+
+                case R.id.item_share:
+
+                case R.id.item_download:
+
+                case R.id.item_move:
+
+                case R.id.item_copy:
+
+                    mode.finish();
+            }
+
+            return false;
+        }
+
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+
+            mode.getMenuInflater().inflate(R.menu.contextual_list_view, menu);
+
+            return true;
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+
+            return false;
         }
     }
 }

@@ -5,8 +5,13 @@ package com.example.milindmahajan.spartandrive.model;
  */
 public class DropboxItem {
 
+    String id;
     String name;
     String path;
+    String shareLink;
+    boolean isFile;
+    String created;
+    String modified;
 
     public void setName (String name) {
 
