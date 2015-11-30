@@ -9,6 +9,7 @@ import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ActionMode;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -51,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
         Common.getDropboxObj().getSession().startOAuth2Authentication(MainActivity.this);
 
         ListView listView = (ListView)findViewById(R.id.list_view);
-        listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+        registerForContextMenu(listView);
 
         addClickListener();
     }
@@ -60,6 +61,70 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
 
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    private static final int CONTEXTMENU_OPTION_DELETE = 1;
+    private static final int CONTEXTMENU_OPTION_SHARE = 2;
+    private static final int CONTEXTMENU_OPTION_DOWNLOAD = 3;
+    private static final int CONTEXTMENU_OPTION_MOVE = 4;
+    private static final int CONTEXTMENU_OPTION_COPY = 5;
+    private static final int CONTEXTMENU_OPTION_CANCEL = 6;
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+
+        super.onCreateContextMenu(menu, v, menuInfo);
+
+        AdapterView.AdapterContextMenuInfo contextMenuInfo = (AdapterView.AdapterContextMenuInfo) menuInfo;
+        menu.setHeaderTitle(this.results.get(contextMenuInfo.position));
+
+        menu.add(Menu.NONE, CONTEXTMENU_OPTION_DELETE, 0, "Delete");
+        menu.add(Menu.NONE, CONTEXTMENU_OPTION_SHARE, 1, "Share");
+        menu.add(Menu.NONE, CONTEXTMENU_OPTION_DOWNLOAD, 2, "Download");
+        menu.add(Menu.NONE, CONTEXTMENU_OPTION_MOVE, 3, "Move");
+        menu.add(Menu.NONE, CONTEXTMENU_OPTION_COPY, 4, "Copy");
+        menu.add(Menu.NONE, CONTEXTMENU_OPTION_CANCEL, 5, "Cancel");
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+
+        AdapterView.AdapterContextMenuInfo menuInfo = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
+
+        switch (item.getItemId()) {
+
+            case CONTEXTMENU_OPTION_DELETE:
+
+                showToast("Delete");
+                break;
+
+            case CONTEXTMENU_OPTION_SHARE:
+
+                showToast("Share");
+                break;
+
+            case CONTEXTMENU_OPTION_DOWNLOAD:
+
+                showToast("Download");
+                break;
+
+            case CONTEXTMENU_OPTION_MOVE:
+
+                showToast("Move");
+                break;
+
+            case CONTEXTMENU_OPTION_COPY:
+
+                showToast("Copy");
+                break;
+
+            case CONTEXTMENU_OPTION_CANCEL:
+
+                showToast("Cancel");
+                break;
+        }
+
         return true;
     }
 
@@ -164,6 +229,9 @@ public class MainActivity extends AppCompatActivity {
         if (loggedIn) {
 
             onResume = false;
+        } else {
+
+            FileOperations.listAllFiles(handler, "/SpartanDrive");
         }
     }
 
