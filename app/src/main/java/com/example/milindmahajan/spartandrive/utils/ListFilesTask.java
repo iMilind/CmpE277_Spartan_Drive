@@ -7,6 +7,7 @@ import android.os.Message;
 
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.exception.DropboxException;
+import com.example.milindmahajan.spartandrive.model.DropboxItem;
 
 import java.util.ArrayList;
 
@@ -51,9 +52,9 @@ public class ListFilesTask extends AsyncTask<String, Void, ArrayList<String>> {
         try {
 
             DropboxAPI.Entry dir = dropbox.metadata(params[0], 1000, null, true, null);
-            for (DropboxAPI.Entry e : dir.contents) {
+            for (DropboxAPI.Entry entry : dir.contents) {
 
-                fileList.add(e.fileName());
+                fileList.add(entry.path);
             }
         } catch (DropboxException e) {
 

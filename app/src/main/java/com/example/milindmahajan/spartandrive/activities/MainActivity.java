@@ -1,5 +1,6 @@
 package com.example.milindmahajan.spartandrive.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -22,7 +23,7 @@ import com.example.milindmahajan.spartandrive.utils.FileOperations;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ListViewFragment.ListViewFragmentListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,8 +34,6 @@ public class MainActivity extends AppCompatActivity {
         AndroidAuthSession session = buildSession();
         Common.setDropboxObj(new DropboxAPI<AndroidAuthSession>(session));
         Common.getDropboxObj().getSession().startOAuth2Authentication(MainActivity.this);
-
-        FileOperations.listAllFiles(handler, "/SpartanDrive/");
     }
 
     @Override
@@ -113,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static String getPath() {
 
-        return "/SpartanDrive/";
+        return "/SpartanDrive";
     }
 
     private void showToast(String msg) {
@@ -128,6 +127,9 @@ public class MainActivity extends AppCompatActivity {
         if (loggedIn) {
 
             onResume = false;
+        } else {
+
+            FileOperations.listAllFiles(handler, "/SpartanDrive");
         }
     }
 
@@ -179,15 +181,19 @@ public class MainActivity extends AppCompatActivity {
 
             ArrayList<String> result = msg.getData().getStringArrayList("data");
 
+            Context con = getApplicationContext();
             ListViewFragment listViewFragment = (ListViewFragment)getFragmentManager().findFragmentById(R.id.listViewFragment);
-//            listViewFragment.reloadListView(result);
+            listViewFragment.reloadListView(result, con);
             System.out.println("Dropbox GET result "+result);
-//            for (String fileName : result) {
-//
-//                System.out.println("Dropbox item " + fileName);
-//                Log.i("ListFiles", fileName);
-//            }
+            for (String fileName : result) {
+
+                System.out.println("Dropbox item " + fileName);
+            }
         }
     };
 
+    public void didSelectRow(String id, boolean isFile) {
+
+        System.out.println("Selected id is "+id);
+    }
 }

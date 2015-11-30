@@ -1,10 +1,15 @@
 package com.example.milindmahajan.spartandrive.fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.app.Fragment;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,8 +22,11 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.dropbox.client2.DropboxAPI;
+import com.dropbox.client2.exception.DropboxException;
 import com.example.milindmahajan.spartandrive.R;
 import com.example.milindmahajan.spartandrive.model.DropboxItem;
+import com.example.milindmahajan.spartandrive.utils.Common;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,9 +44,8 @@ public class ListViewFragment extends Fragment {
     }
 
     View rootView;
-    private ArrayList<DropboxItem> results = new ArrayList<DropboxItem>();
-    private ActionMode mActionMode;
-    private ListViewAdapter mAdapter;
+    private ArrayList<String> results = new ArrayList<String>();
+    private ListViewAdapter listViewAdapter;
 
 
     @Override
@@ -47,8 +54,8 @@ public class ListViewFragment extends Fragment {
 
         rootView = inflater.inflate(R.layout.fragment_list_view, container, false);
 
-        ListView favoritesList = (ListView)rootView.findViewById(R.id.list_view);
-        favoritesList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+        ListView listView = (ListView)rootView.findViewById(R.id.list_view);
+        listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
 
         addClickListener();
 
@@ -95,8 +102,8 @@ public class ListViewFragment extends Fragment {
 
     private void addClickListener(){
 
-        ListView favoriteVideos = (ListView)rootView.findViewById(R.id.list_view);
-        favoriteVideos.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        ListView listView = (ListView)rootView.findViewById(R.id.list_view);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> av, View v, int pos,
@@ -105,65 +112,37 @@ public class ListViewFragment extends Fragment {
                 System.out.println("onItemClick Adapter View Favorite fragment");
 //                String videoId = searchResults.get(pos).getId();
 
-                listViewFragmentListener.didSelectRow("", true);
+                listViewFragmentListener.didSelectRow(results.get(pos), true);
             }
         });
     }
 
-    public void reloadListView (ArrayList<DropboxItem> dropboxItems) {
+    public void reloadListView (ArrayList<String> dropboxItems, Context context) {
 
         this.results.removeAll(this.results);
         this.results.addAll(dropboxItems);
 
-        updateVideosFound();
+        reloadData(this.results, context);
     }
 
-    private void updateVideosFound() {
+    private void reloadData(ArrayList <String> dropboxItems, Context context) {
 
-        mAdapter = new ListViewAdapter(getContext(),
-                R.layout.dropbox_item, 0, this.results);
+        listViewAdapter = new ListViewAdapter(context,
+                R.layout.dropbox_item, 0, dropboxItems);
+
+
         ListView listView = (ListView)rootView.findViewById(R.id.list_view);
-        listView.setAdapter(mAdapter);
+        listView.setAdapter(listViewAdapter);
     }
 
-    private class ListViewAdapter extends ArrayAdapter<DropboxItem> {
+    private class ListViewAdapter extends ArrayAdapter<String> {
 
-        ArrayList <DropboxItem> videoList = new ArrayList<DropboxItem>();
-        ArrayList <DropboxItem> selectedFiles = new ArrayList<DropboxItem>();
+        ArrayList <String> dropboxItems = new ArrayList<String>();
 
-        public ListViewAdapter(Context context, int resource, int textViewResourceId, List <DropboxItem> objects) {
+        public ListViewAdapter(Context context, int resource, int textViewResourceId, List <String> objects) {
 
             super(context, resource, textViewResourceId, objects);
-            videoList.addAll(objects);
-        }
-
-        public void setNewSelection(int position, boolean value) {
-
-            selectedFiles.add(videoList.get(position));
-            notifyDataSetChanged();
-        }
-
-        public void removeSelection(int position) {
-
-            removeFromSelection(videoList.get(position));
-            notifyDataSetChanged();
-        }
-
-        private void removeFromSelection (DropboxItem file) {
-
-            for (int i = 0; i < selectedFiles.size(); i++) {
-
-//                if (selectedFiles.get(i).getId().equals(file.getId())) {
-//
-//                    selectedFiles.remove(i);
-//                    break;
-//                }
-            }
-        }
-
-        public ArrayList <DropboxItem> getSelectedFiles () {
-
-            return this.selectedFiles;
+            this.dropboxItems.addAll(objects);
         }
 
         @Override
@@ -174,10 +153,11 @@ public class ListViewFragment extends Fragment {
                 convertView = getActivity().getLayoutInflater().inflate(R.layout.dropbox_item, parent, false);
             }
 
-            DropboxItem searchResult = videoList.get(position);
+            String searchResult = this.dropboxItems.get(position);
 
             ImageView imageView = (ImageView)convertView.findViewById(R.id.icon);
             TextView title = (TextView)convertView.findViewById(R.id.title);
+            title.setText(searchResult);
             CheckBox checkBox = (CheckBox)convertView.findViewById(R.id.checkBox);
             checkBox.setVisibility(View.VISIBLE);
 
@@ -186,21 +166,6 @@ public class ListViewFragment extends Fragment {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
-                    if (isChecked) {
-
-                        mAdapter.setNewSelection(position, isChecked);
-                    } else {
-
-                        mAdapter.removeSelection(position);
-                    }
-
-                    if (mAdapter.getSelectedFiles().size() != 0) {
-
-//                        mActionMode = getActivity().startActionMode(new ActionBarCallBack());
-                    } else {
-
-                        mActionMode.finish();
-                    }
                 }
             });
 
