@@ -23,11 +23,13 @@ import android.widget.Toast;
 
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.android.AndroidAuthSession;
+import com.dropbox.client2.exception.DropboxException;
 import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
 import com.example.milindmahajan.spartandrive.R;
 import com.example.milindmahajan.spartandrive.utils.Common;
 import com.example.milindmahajan.spartandrive.utils.FileOperations;
+import com.example.milindmahajan.spartandrive.utils.FileTasks;
 import com.example.milindmahajan.spartandrive.utils.ListFilesTask;
 
 import java.util.ArrayList;
@@ -38,6 +40,14 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> results = new ArrayList<String>();
     private ListViewAdapter listViewAdapter;
     private ActionMode actionMode;
+
+    private static final int CONTEXTMENU_OPTION_DELETE = 1;
+    private static final int CONTEXTMENU_OPTION_SHARE = 2;
+    private static final int CONTEXTMENU_OPTION_DOWNLOAD = 3;
+    private static final int CONTEXTMENU_OPTION_MOVE = 4;
+    private static final int CONTEXTMENU_OPTION_COPY = 5;
+    private static final int CONTEXTMENU_OPTION_CANCEL = 6;
+
 
 
     @Override
@@ -55,12 +65,6 @@ public class MainActivity extends AppCompatActivity {
 
         addClickListener();
 
-        if(mLoggedIn)
-        {
-
-        }
-
-
     }
 
     @Override
@@ -70,12 +74,6 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    private static final int CONTEXTMENU_OPTION_DELETE = 1;
-    private static final int CONTEXTMENU_OPTION_SHARE = 2;
-    private static final int CONTEXTMENU_OPTION_DOWNLOAD = 3;
-    private static final int CONTEXTMENU_OPTION_MOVE = 4;
-    private static final int CONTEXTMENU_OPTION_COPY = 5;
-    private static final int CONTEXTMENU_OPTION_CANCEL = 6;
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
@@ -200,6 +198,7 @@ public class MainActivity extends AppCompatActivity {
                 System.out.print(accessToken);
                 storeKeys("oauth2:", accessToken);
                 setLoggedIn(true);
+
             } catch (IllegalStateException e) {
 
                 Log.i("DbAuthLog", "Error authenticating", e);
@@ -210,19 +209,18 @@ public class MainActivity extends AppCompatActivity {
         }
         if(mLoggedIn)
         {
-            ListFilesTask t = (ListFilesTask) new ListFilesTask(new ListFilesTask.AsyncResponse() {
-                @Override
-                public void processFinish(ArrayList<DropboxAPI.Entry> output) {
-                    ArrayList<String> result = new ArrayList<String>();
+            try
+            {
+                createDIR();
+            }
+            catch (DropboxException e) {
+
+                Log.i("DbAuthLog", "Error creating SpartanDrive Folder..", e);
+                showToast("Error creating SpartanDrive Folder..Please contact Administrator");
+            }
 
 
-                    for(DropboxAPI.Entry e : output)
-                    {
-                        result.add(e.path);
-                    }
-                    reloadListView(result);
-                }
-            }).execute("/SpartanDrive");
+            //refreshList(Common.rootDIR);
         }
 
     }
@@ -243,6 +241,22 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void refreshList(String path)
+    {
+        ListFilesTask t = (ListFilesTask) new ListFilesTask(new ListFilesTask.AsyncResponse() {
+            @Override
+            public void processFinish(ArrayList<DropboxAPI.Entry> output) {
+                ArrayList<String> result = new ArrayList<String>();
+
+
+                for(DropboxAPI.Entry e : output)
+                {
+                    result.add(e.path);
+                }
+                reloadListView(result);
+            }
+        }).execute(path);
+    }
     private void storeKeys(String key, String secret) {
 
         SharedPreferences prefs = getSharedPreferences(Common.ACCOUNT_PREFS_NAME, 0);
@@ -436,8 +450,42 @@ public class MainActivity extends AppCompatActivity {
     private void deleteFromDropbox(ArrayList <String> dropboxItems) {
 
         for (String path : dropboxItems) {
+            FileTasks f = (FileTasks) new FileTasks(MainActivity.this, new FileTasks.AsyncResponse() {
+                @Override
+                public void processFinish(boolean result) {
 
-            FileOperations.delete(getApplicationContext(), path);
+                    if(result)
+                    {
+                        refreshList("/SpartanDrive");
+                    }
+                }
+            }).execute(Common.METHOD_DELETE,path);
         }
+    }
+
+    public void createDIR() throws DropboxException
+    {
+
+        ListFilesTask t = (ListFilesTask) new ListFilesTask(new ListFilesTask.AsyncResponse() {
+            @Override
+            public void processFinish(ArrayList<DropboxAPI.Entry> output) {
+
+
+                // SpartanDrive Folder does not exist.. create it
+                if(output.size()==0)
+                {
+                    FileTasks f = (FileTasks)new FileTasks(MainActivity.this, new FileTasks.AsyncResponse() {
+                        @Override
+                        public void processFinish(boolean result) {
+
+                            //refreshList(Common.rootDIR);
+
+                        }
+                    }).execute(Common.METHOD_CREATE_FOLDER,Common.rootDIR);
+                }
+                refreshList(Common.rootDIR);
+            }
+        }).execute(Common.rootDIR);
+
     }
 }
