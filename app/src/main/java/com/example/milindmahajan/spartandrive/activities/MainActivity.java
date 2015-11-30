@@ -35,7 +35,6 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private ArrayList<String> results = new ArrayList<String>();
-    private ListViewAdapter listViewAdapter;
 
 
     @Override
@@ -64,13 +63,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        int id = item.getItemId();
-
-        if (id == R.id.action_settings) {
-
-            return true;
-        }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -91,7 +83,6 @@ public class MainActivity extends AppCompatActivity {
                                     long id) {
 
                 System.out.println("onItemClick Adapter View Favorite fragment");
-//                String videoId = searchResults.get(pos).getId();
             }
         });
     }
@@ -230,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void reloadData(ArrayList <String> dropboxItems) {
 
-        listViewAdapter = new ListViewAdapter(getApplicationContext(),
+        ListViewAdapter listViewAdapter = new ListViewAdapter(getApplicationContext(),
                 R.layout.dropbox_item, 0, dropboxItems);
 
 
