@@ -18,22 +18,24 @@ import java.util.ArrayList;
 public class ListFilesTask extends AsyncTask<String, Void, ArrayList<DropboxAPI.Entry>> {
 
     private DropboxAPI<?> dropbox = Common.getDropboxObj();
+    public AsyncResponse respObj = null;
+
 
     // #########################Interface code ############################
+
     public interface AsyncResponse {
+
         void processFinish(ArrayList<DropboxAPI.Entry> output);
     }
 
-    public AsyncResponse respObj = null;
-
     public ListFilesTask(AsyncResponse respObj){
+
         this.respObj = respObj;
     }
 
+
     //#######################################################################
-
-
-
+    
     @Override
     protected ArrayList<DropboxAPI.Entry> doInBackground(String... params) {
 
@@ -57,12 +59,6 @@ public class ListFilesTask extends AsyncTask<String, Void, ArrayList<DropboxAPI.
     @Override
     protected void onPostExecute(ArrayList<DropboxAPI.Entry> result) {
 
-        /*Message msgObj = handler.obtainMessage();
-        Bundle b = new Bundle();
-        b.putParcelableArrayList("d",result);
-        b.putStringArrayList("data", result);
-        msgObj.setData(b);
-        handler.sendMessage(msgObj);*/
         respObj.processFinish(result);
     }
 }

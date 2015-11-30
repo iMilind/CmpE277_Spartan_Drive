@@ -204,7 +204,6 @@ public class MainActivity extends AppCompatActivity {
 
                 Log.i("DbAuthLog", "Error authenticating", e);
                 showToast("Couldn't authenticate with Dropbox:"
-                        + e.getLocalizedMessage());showToast("Couldn't authenticate with Dropbox:"
                         + e.getLocalizedMessage());
             }
         }
