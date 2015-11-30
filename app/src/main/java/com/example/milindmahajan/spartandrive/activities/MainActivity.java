@@ -356,9 +356,9 @@ public class MainActivity extends AppCompatActivity {
 
         public boolean isSelected (String path) {
 
-            for (String selectedFile : selectedFiles) {
+            for (String file : selectedFiles) {
 
-                if (path.equals(selectedFile)) {
+                if (path.equals(file)) {
 
                     return true;
                 }
@@ -385,12 +385,12 @@ public class MainActivity extends AppCompatActivity {
 
             checkBox.setChecked(listViewAdapter.isSelected(this.dropboxItems.get(position)));
 
-            checkBox.setOnClickListener(new View.OnClickListener() {
+            checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
                 @Override
-                public void onClick(View v) {
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
-                    if(!checkBox.isChecked()) {
+                    if(isChecked) {
 
                         listViewAdapter.setNewSelection(dropboxItems.get(position));
                     } else {
@@ -407,30 +407,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             });
-
-//            checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//
-//                @Override
-//                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//
-//                    if(isChecked) {
-//
-//                        listViewAdapter.setNewSelection(dropboxItems.get(position));
-//                    }
-//                    else {
-//
-//                        listViewAdapter.removeSelection(dropboxItems.get(position));
-//                    }
-//
-//                    if (listViewAdapter.getSelectedFiles().size() != 0) {
-//
-//                        actionMode = MainActivity.this.startActionMode(new ActionBarCallBack());
-//                    } else {
-//
-//                        actionMode.finish();
-//                    }
-//                }
-//            });
 
             return convertView;
         }
