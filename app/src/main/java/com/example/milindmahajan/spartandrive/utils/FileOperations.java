@@ -37,17 +37,6 @@ public class FileOperations {
             t.execute("CREATE", path);
         }
     }
-   // redundant
-   /* public static void dropboxItemInfo (String path) {
-
-        ListFilesTask listFilesTask = new ListFilesTask();
-        if(Common.getDropboxObj()!=null) {
-
-            listFilesTask.execute(path);
-        }
-    }*/
-
-
 
     public static void copy(Context context, String oldPath, String newPath) {
 

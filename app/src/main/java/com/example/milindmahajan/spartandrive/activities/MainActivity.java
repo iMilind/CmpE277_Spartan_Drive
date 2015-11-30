@@ -27,6 +27,7 @@ import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
 import com.example.milindmahajan.spartandrive.R;
 import com.example.milindmahajan.spartandrive.utils.Common;
+import com.example.milindmahajan.spartandrive.utils.FileOperations;
 import com.example.milindmahajan.spartandrive.utils.ListFilesTask;
 
 import java.util.ArrayList;
@@ -95,13 +96,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
 
-        AdapterView.AdapterContextMenuInfo menuInfo = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
+        AdapterView.AdapterContextMenuInfo contextMenuInfo = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
 
         switch (item.getItemId()) {
 
             case CONTEXTMENU_OPTION_DELETE:
 
-                showToast("Delete");
+                ArrayList <String> selectedItem = new ArrayList<String>();
+                selectedItem.add(this.results.get(contextMenuInfo.position));
+                deleteFromDropbox(selectedItem);
+
                 break;
 
             case CONTEXTMENU_OPTION_SHARE:
@@ -223,11 +227,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public static String getPath() {
-
-        return "/SpartanDrive";
-    }
-
     private void showToast(String msg) {
 
         Toast error = Toast.makeText(this, msg, Toast.LENGTH_LONG);
@@ -285,16 +284,6 @@ public class MainActivity extends AppCompatActivity {
             return null;
         }
     }
-
-    /*private final Handler handler = new Handler() {
-
-        public void handleMessage(Message msg) {
-
-            ArrayList<String> result = msg.getData().getStringArrayList("data");
-
-            reloadListView(result);
-        }
-    };*/
 
     public void reloadListView (ArrayList<String> dropboxItems) {
 
@@ -408,6 +397,8 @@ public class MainActivity extends AppCompatActivity {
 
                 case R.id.item_delete:
 
+                    deleteFromDropbox(listViewAdapter.getSelectedFiles());
+
                 case R.id.item_share:
 
                 case R.id.item_download:
@@ -439,6 +430,14 @@ public class MainActivity extends AppCompatActivity {
         public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
 
             return false;
+        }
+    }
+
+    private void deleteFromDropbox(ArrayList <String> dropboxItems) {
+
+        for (String path : dropboxItems) {
+
+            FileOperations.delete(getApplicationContext(), path);
         }
     }
 }
