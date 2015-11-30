@@ -54,13 +54,6 @@ public class MainActivity extends AppCompatActivity {
         registerForContextMenu(listView);
 
         addClickListener();
-
-        if(mLoggedIn)
-        {
-
-        }
-
-
     }
 
     @Override
@@ -70,12 +63,13 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    private static final int CONTEXTMENU_OPTION_DELETE = 1;
-    private static final int CONTEXTMENU_OPTION_SHARE = 2;
-    private static final int CONTEXTMENU_OPTION_DOWNLOAD = 3;
-    private static final int CONTEXTMENU_OPTION_MOVE = 4;
-    private static final int CONTEXTMENU_OPTION_COPY = 5;
-    private static final int CONTEXTMENU_OPTION_CANCEL = 6;
+    private static final int CONTEXTMENU_OPTION_VIEW = 1;
+    private static final int CONTEXTMENU_OPTION_DELETE = 2;
+    private static final int CONTEXTMENU_OPTION_SHARE = 3;
+    private static final int CONTEXTMENU_OPTION_DOWNLOAD = 4;
+    private static final int CONTEXTMENU_OPTION_MOVE = 5;
+    private static final int CONTEXTMENU_OPTION_COPY = 6;
+    private static final int CONTEXTMENU_OPTION_CANCEL = 7;
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
@@ -85,12 +79,13 @@ public class MainActivity extends AppCompatActivity {
         AdapterView.AdapterContextMenuInfo contextMenuInfo = (AdapterView.AdapterContextMenuInfo) menuInfo;
         menu.setHeaderTitle(this.results.get(contextMenuInfo.position));
 
-        menu.add(Menu.NONE, CONTEXTMENU_OPTION_DELETE, 0, "Delete");
-        menu.add(Menu.NONE, CONTEXTMENU_OPTION_SHARE, 1, "Share");
-        menu.add(Menu.NONE, CONTEXTMENU_OPTION_DOWNLOAD, 2, "Download");
-        menu.add(Menu.NONE, CONTEXTMENU_OPTION_MOVE, 3, "Move");
-        menu.add(Menu.NONE, CONTEXTMENU_OPTION_COPY, 4, "Copy");
-        menu.add(Menu.NONE, CONTEXTMENU_OPTION_CANCEL, 5, "Cancel");
+        menu.add(Menu.NONE, CONTEXTMENU_OPTION_VIEW, 0, "View");
+        menu.add(Menu.NONE, CONTEXTMENU_OPTION_DELETE, 1, "Delete");
+        menu.add(Menu.NONE, CONTEXTMENU_OPTION_SHARE, 2, "Share");
+        menu.add(Menu.NONE, CONTEXTMENU_OPTION_DOWNLOAD, 3, "Download");
+        menu.add(Menu.NONE, CONTEXTMENU_OPTION_MOVE, 4, "Move");
+        menu.add(Menu.NONE, CONTEXTMENU_OPTION_COPY, 5, "Copy");
+        menu.add(Menu.NONE, CONTEXTMENU_OPTION_CANCEL, 6, "Cancel");
     }
 
     @Override
@@ -99,6 +94,11 @@ public class MainActivity extends AppCompatActivity {
         AdapterView.AdapterContextMenuInfo contextMenuInfo = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
 
         switch (item.getItemId()) {
+
+            case CONTEXTMENU_OPTION_VIEW:
+
+                showToast("View");
+                break;
 
             case CONTEXTMENU_OPTION_DELETE:
 
@@ -313,25 +313,21 @@ public class MainActivity extends AppCompatActivity {
             this.dropboxItems.addAll(objects);
         }
 
-        public void setNewSelection(int position, boolean value) {
+        public void setNewSelection(String path) {
 
-            selectedFiles.add(dropboxItems.get(position));
+            selectedFiles.add(path);
             notifyDataSetChanged();
         }
 
-        public void removeSelection(int position) {
-
-            removeFromSelection(dropboxItems.get(position));
-            notifyDataSetChanged();
-        }
-
-        private void removeFromSelection (String stringPath) {
+        public void removeSelection(String path) {
 
             for (int i = 0; i < selectedFiles.size(); i++) {
 
-                if (selectedFiles.get(i).equals(stringPath)) {
+                if (selectedFiles.get(i).equals(path)) {
 
                     selectedFiles.remove(i);
+                    notifyDataSetChanged();
+
                     break;
                 }
             }
@@ -340,6 +336,19 @@ public class MainActivity extends AppCompatActivity {
         public ArrayList <String> getSelectedFiles () {
 
             return this.selectedFiles;
+        }
+
+        public boolean isSelected (String path) {
+
+            for (String selectedFile : selectedFiles) {
+
+                if (path.equals(selectedFile)) {
+
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         @Override
@@ -355,21 +364,22 @@ public class MainActivity extends AppCompatActivity {
             ImageView imageView = (ImageView)convertView.findViewById(R.id.icon);
             TextView title = (TextView)convertView.findViewById(R.id.title);
             title.setText(searchResult);
-            CheckBox checkBox = (CheckBox)convertView.findViewById(R.id.checkBox);
+            final CheckBox checkBox = (CheckBox)convertView.findViewById(R.id.checkBox);
             checkBox.setVisibility(View.VISIBLE);
 
-            checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            checkBox.setChecked(listViewAdapter.isSelected(this.dropboxItems.get(position)));
+
+            checkBox.setOnClickListener(new View.OnClickListener() {
 
                 @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                public void onClick(View v) {
 
-                    if(isChecked) {
+                    if(!checkBox.isChecked()) {
 
-                        listViewAdapter.setNewSelection(position, isChecked);
-                    }
-                    else {
+                        listViewAdapter.setNewSelection(dropboxItems.get(position));
+                    } else {
 
-                        listViewAdapter.removeSelection(position);
+                        listViewAdapter.removeSelection(dropboxItems.get(position));
                     }
 
                     if (listViewAdapter.getSelectedFiles().size() != 0) {
@@ -381,6 +391,30 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             });
+
+//            checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//
+//                @Override
+//                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//
+//                    if(isChecked) {
+//
+//                        listViewAdapter.setNewSelection(dropboxItems.get(position));
+//                    }
+//                    else {
+//
+//                        listViewAdapter.removeSelection(dropboxItems.get(position));
+//                    }
+//
+//                    if (listViewAdapter.getSelectedFiles().size() != 0) {
+//
+//                        actionMode = MainActivity.this.startActionMode(new ActionBarCallBack());
+//                    } else {
+//
+//                        actionMode.finish();
+//                    }
+//                }
+//            });
 
             return convertView;
         }
