@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,24 +37,17 @@ public class FileOperations {
             t.execute("CREATE", path);
         }
     }
+   // redundant
+   /* public static void dropboxItemInfo (String path) {
 
-    public static void dropboxItemInfo (Handler handler, String path) {
-
-        ListFilesTask listFilesTask = new ListFilesTask(handler);
+        ListFilesTask listFilesTask = new ListFilesTask();
         if(Common.getDropboxObj()!=null) {
 
             listFilesTask.execute(path);
         }
-    }
+    }*/
 
-    public static void listAllFiles(Handler h, String path) {
 
-        ListFilesTask t = new ListFilesTask(h);
-        if(Common.getDropboxObj()!=null) {
-
-            t.execute(path);
-        }
-    }
 
     public static void copy(Context context, String oldPath, String newPath) {
 

@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ActionMode;
@@ -29,7 +27,7 @@ import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
 import com.example.milindmahajan.spartandrive.R;
 import com.example.milindmahajan.spartandrive.utils.Common;
-import com.example.milindmahajan.spartandrive.utils.FileOperations;
+import com.example.milindmahajan.spartandrive.utils.ListFilesTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +53,13 @@ public class MainActivity extends AppCompatActivity {
         registerForContextMenu(listView);
 
         addClickListener();
+
+        if(mLoggedIn)
+        {
+
+        }
+
+
     }
 
     @Override
@@ -131,13 +136,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        int id = item.getItemId();
-
-        if (id == R.id.action_settings) {
-
-            return true;
-        }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -158,7 +156,6 @@ public class MainActivity extends AppCompatActivity {
                                     long id) {
 
                 System.out.println("onItemClick Adapter View Favorite fragment");
-//                String videoId = searchResults.get(pos).getId();
             }
         });
     }
@@ -198,10 +195,7 @@ public class MainActivity extends AppCompatActivity {
                 String accessToken = mApi.getSession().getOAuth2AccessToken();
                 System.out.print(accessToken);
                 storeKeys("oauth2:", accessToken);
-                setLoggedIn(onResume);
-                String path = getPath();
-                System.out.print(path);
-
+                setLoggedIn(true);
             } catch (IllegalStateException e) {
 
                 Log.i("DbAuthLog", "Error authenticating", e);
@@ -210,6 +204,23 @@ public class MainActivity extends AppCompatActivity {
                         + e.getLocalizedMessage());
             }
         }
+        if(mLoggedIn)
+        {
+            ListFilesTask t = (ListFilesTask) new ListFilesTask(new ListFilesTask.AsyncResponse() {
+                @Override
+                public void processFinish(ArrayList<DropboxAPI.Entry> output) {
+                    ArrayList<String> result = new ArrayList<String>();
+
+
+                    for(DropboxAPI.Entry e : output)
+                    {
+                        result.add(e.path);
+                    }
+                    reloadListView(result);
+                }
+            }).execute("/SpartanDrive");
+        }
+
     }
 
     public static String getPath() {
@@ -229,10 +240,8 @@ public class MainActivity extends AppCompatActivity {
         if (loggedIn) {
 
             onResume = false;
-        } else {
-
-            FileOperations.listAllFiles(handler, "/SpartanDrive");
         }
+
     }
 
     private void storeKeys(String key, String secret) {
@@ -277,7 +286,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private final Handler handler = new Handler() {
+    /*private final Handler handler = new Handler() {
 
         public void handleMessage(Message msg) {
 
@@ -285,7 +294,7 @@ public class MainActivity extends AppCompatActivity {
 
             reloadListView(result);
         }
-    };
+    };*/
 
     public void reloadListView (ArrayList<String> dropboxItems) {
 

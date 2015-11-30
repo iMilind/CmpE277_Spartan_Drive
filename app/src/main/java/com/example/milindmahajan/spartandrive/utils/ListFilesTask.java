@@ -1,13 +1,9 @@
 package com.example.milindmahajan.spartandrive.utils;
 
 import android.os.AsyncTask;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.exception.DropboxException;
-import com.example.milindmahajan.spartandrive.model.DropboxItem;
 
 import java.util.ArrayList;
 
@@ -19,43 +15,37 @@ import java.util.ArrayList;
 //   1. Exception Handling and Logging
 //   2. Testing
 
-/**
- * Use this task with a handler;
- * Sample Code for the handler
- *
- *  private final Handler handler = new Handler() {
-    public void handleMessage(Message msg) {
-        ArrayList<String> result = msg.getData().getStringArrayList("data");
-        for (String fileName : result) {
-            Log.i("ListFiles", fileName);
-            TextView tv = new TextView(DropboxActivity.this);
-            tv.setText(fileName);
-        }
+public class ListFilesTask extends AsyncTask<String, Void, ArrayList<DropboxAPI.Entry>> {
+
+    private DropboxAPI<?> dropbox = Common.getDropboxObj();
+
+    // #########################Interface code ############################
+    public interface AsyncResponse {
+        void processFinish(ArrayList<DropboxAPI.Entry> output);
     }
- };
- */
-public class ListFilesTask extends AsyncTask<String, Void, ArrayList<String>> {
 
-    private DropboxAPI<?> dropbox;
-    private Handler handler;
+    public AsyncResponse respObj = null;
 
-    public ListFilesTask(Handler handler) {
-
-        this.dropbox = Common.getDropboxObj();
-        this.handler = handler;
+    public ListFilesTask(AsyncResponse respObj){
+        this.respObj = respObj;
     }
+
+    //#######################################################################
+
+
 
     @Override
-    protected ArrayList<String> doInBackground(String... params) {
+    protected ArrayList<DropboxAPI.Entry> doInBackground(String... params) {
 
-        ArrayList<String> fileList = new ArrayList<String>();
+        ArrayList<DropboxAPI.Entry> fileList = new ArrayList<DropboxAPI.Entry>();
         try {
 
             DropboxAPI.Entry dir = dropbox.metadata(params[0], 1000, null, true, null);
             for (DropboxAPI.Entry entry : dir.contents) {
 
-                fileList.add(entry.path);
+                fileList.add(entry);
             }
+
         } catch (DropboxException e) {
 
             e.printStackTrace();
@@ -65,12 +55,14 @@ public class ListFilesTask extends AsyncTask<String, Void, ArrayList<String>> {
     }
 
     @Override
-    protected void onPostExecute(ArrayList<String> result) {
+    protected void onPostExecute(ArrayList<DropboxAPI.Entry> result) {
 
-        Message msgObj = handler.obtainMessage();
+        /*Message msgObj = handler.obtainMessage();
         Bundle b = new Bundle();
+        b.putParcelableArrayList("d",result);
         b.putStringArrayList("data", result);
         msgObj.setData(b);
-        handler.sendMessage(msgObj);
+        handler.sendMessage(msgObj);*/
+        respObj.processFinish(result);
     }
 }
