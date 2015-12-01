@@ -313,12 +313,21 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
     }
 
-    public void didSelectDropboxItem(DropboxItem dropboxItem) {
+    public void viewDropboxItem(DropboxItem dropboxItem) {
 
-        Intent filePreviewIntent = new Intent(getBaseContext(), FilePreviewActivity.class);
-        filePreviewIntent.putExtra("previewUrl",
-                "https://www.dropbox.com/s/03z6lb2u4pp8yz1/SpartanDrive.docx?dl=0");
-        startActivity(filePreviewIntent);
+        ShareTask f = (ShareTask) new ShareTask(MainActivity.this, new ShareTask.AsyncResponse() {
+
+            @Override
+            public void processFinish(String result) {
+
+                if (result != null) {
+
+                    Intent filePreviewIntent = new Intent(getApplicationContext(), FilePreviewActivity.class);
+                    filePreviewIntent.putExtra("previewUrl", result);
+                    startActivity(filePreviewIntent);
+                }
+            }
+        }).execute("/SpartanDrive", dropboxItem.getPath());
     }
 
     public void beginContextualActionMode(ArrayList <DropboxItem> selectedItems) {

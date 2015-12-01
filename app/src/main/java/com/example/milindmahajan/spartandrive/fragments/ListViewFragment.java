@@ -46,7 +46,7 @@ public class ListViewFragment extends Fragment {
     ListViewFragmentProtocol listViewFragmentListener;
     public interface  ListViewFragmentProtocol {
 
-        public void didSelectDropboxItem(DropboxItem dropboxItem);
+        public void viewDropboxItem(DropboxItem dropboxItem);
 
         public void deleteDropboxItems(ArrayList <DropboxItem> toBeDeleted);
         public void shareFromDropbox(ArrayList <DropboxItem> toBeShared);
@@ -147,6 +147,7 @@ public class ListViewFragment extends Fragment {
 
             case CONTEXTMENU_OPTION_VIEW:
 
+                listViewFragmentListener.viewDropboxItem(dropboxItems.get(contextMenuInfo.position));
                 break;
 
             case CONTEXTMENU_OPTION_DELETE:
@@ -192,7 +193,7 @@ public class ListViewFragment extends Fragment {
             public void onItemClick(AdapterView<?> av, View v, int pos,
                                     long id) {
 
-                listViewFragmentListener.didSelectDropboxItem(null);
+                listViewFragmentListener.viewDropboxItem(dropboxItems.get(pos));
             }
         });
     }
