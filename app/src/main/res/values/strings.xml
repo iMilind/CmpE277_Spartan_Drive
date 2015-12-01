@@ -7,4 +7,5 @@
     <string name="dropbox_update">Update</string>
     <string name="dropbox_list">List</string>
     <string name="title_activity_main_ui">MainUIActivity</string>
+    <string name="title_activity_file_preview">FilePreviewActivity</string>
 </resources>
