@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -46,6 +47,8 @@ public class ListViewFragment extends Fragment {
     public interface  ListViewFragmentProtocol {
 
         public void didSelectDropboxItem(DropboxItem dropboxItem);
+
+        public void deleteDropboxItems(ArrayList <DropboxItem> toBeDeleted);
 
         public void beginContextualActionMode(ArrayList <DropboxItem> selectedItems);
         public void endContextualActionMode();
@@ -134,6 +137,48 @@ public class ListViewFragment extends Fragment {
         menu.add(Menu.NONE, CONTEXTMENU_OPTION_CANCEL, 6, "Cancel");
     }
 
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+
+        AdapterView.AdapterContextMenuInfo contextMenuInfo = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
+
+        switch (item.getItemId()) {
+
+            case CONTEXTMENU_OPTION_VIEW:
+
+                break;
+
+            case CONTEXTMENU_OPTION_DELETE:
+
+                ArrayList <DropboxItem> selectedItem = new ArrayList<DropboxItem>();
+                selectedItem.add(this.dropboxItems.get(contextMenuInfo.position));
+                listViewFragmentListener.deleteDropboxItems(selectedItem);
+                break;
+
+            case CONTEXTMENU_OPTION_SHARE:
+
+                break;
+
+            case CONTEXTMENU_OPTION_DOWNLOAD:
+
+                break;
+
+            case CONTEXTMENU_OPTION_MOVE:
+
+                break;
+
+            case CONTEXTMENU_OPTION_COPY:
+
+                break;
+
+            case CONTEXTMENU_OPTION_CANCEL:
+
+                break;
+        }
+
+        return true;
+    }
+
     private void addClickListener(){
 
         ListView listView = (ListView)parentView.findViewById(R.id.list_view);
@@ -164,6 +209,11 @@ public class ListViewFragment extends Fragment {
 
         ListView listView = (ListView)parentView.findViewById(R.id.list_view);
         listView.setAdapter(listViewAdapter);
+    }
+
+    public ArrayList <DropboxItem> selectedDropboxItems () {
+
+        return listViewAdapter.selectedFiles;
     }
 
     private class ListViewAdapter extends ArrayAdapter<DropboxItem> {
