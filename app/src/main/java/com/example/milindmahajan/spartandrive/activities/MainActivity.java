@@ -2,6 +2,7 @@ package com.example.milindmahajan.spartandrive.activities;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -21,6 +22,7 @@ import com.example.milindmahajan.spartandrive.model.DropboxItem;
 import com.example.milindmahajan.spartandrive.utils.Common;
 import com.example.milindmahajan.spartandrive.utils.FileTasks;
 import com.example.milindmahajan.spartandrive.utils.ListFilesTask;
+import com.example.milindmahajan.spartandrive.utils.ShareTask;
 
 import java.util.ArrayList;
 
@@ -253,6 +255,22 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
                     }
                 }
             }).execute(Common.METHOD_DELETE,path);
+        }
+    }
+
+    private void shareFromDropbox(ArrayList <String> dropboxItems) {
+        for (String path : dropboxItems) {
+            ShareTask f = (ShareTask) new ShareTask(MainActivity.this, new ShareTask.AsyncResponse() {
+                @Override
+                public void processFinish(String result) {
+                    if (result != null) {
+                        Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:deepakrkole@gmail.com?subject=" +
+                                Uri.encode("my subject") + "&body=" +
+                                Uri.encode("My big long body with spaces, new lines, and all sorts of invalid URI characters")));
+                        startActivity(intent);
+                    }
+                }
+            }).execute("/SpartanDrive", path);
         }
     }
 
