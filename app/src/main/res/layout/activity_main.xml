@@ -3,11 +3,19 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <ListView
-        android:id="@+id/list_view"
+    <ImageView
+        android:id="@+id/backGroundImage"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:dividerHeight="5dp"
+        android:background="@drawable/background"
+        />
+
+    <fragment
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:name="com.example.milindmahajan.spartandrive.fragments.ListViewFragment"
+        android:id="@+id/list_view_fragment"
+        tools:layout="@layout/fragment_list_view"
         />
 
 </RelativeLayout>

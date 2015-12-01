@@ -18,24 +18,47 @@
 
     <ImageView
         android:id="@+id/icon"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_centerVertical="true"
         android:layout_alignParentLeft="false"
         android:layout_alignParentTop="true"
-        android:layout_marginLeft="5dp"
         android:layout_toEndOf="@id/checkBox"
         />
 
     <TextView android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="File name goes here"
+        android:text="name goes here"
         android:layout_toRightOf="@+id/icon"
         android:layout_alignParentTop="true"
-        android:layout_marginTop="5dp"
+        android:layout_alignTop="@+id/icon"
+        android:layout_marginLeft="10dp"
         android:textSize="20sp"
         android:textStyle="bold"
         android:textColor="@android:color/holo_blue_dark"
+        />
+
+    <TextView android:id="@+id/description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="description goes here"
+        android:layout_alignLeft="@+id/title"
+        android:layout_marginTop="5dp"
+        android:textSize="15sp"
+        android:textColor="@android:color/black"
+        android:layout_below="@+id/title"
+        />
+
+    <TextView android:id="@+id/modified"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="modified goes here"
+        android:layout_marginTop="5dp"
+        android:layout_alignParentRight="true"
+        android:textSize="10sp"
+        android:textColor="@android:color/darker_gray"
+        android:layout_below="@+id/description"
         />
 
 </RelativeLayout>

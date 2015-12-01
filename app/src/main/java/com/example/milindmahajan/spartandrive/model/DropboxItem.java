@@ -1,27 +1,30 @@
 package com.example.milindmahajan.spartandrive.model;
 
+import com.dropbox.client2.DropboxAPI;
+import com.example.milindmahajan.spartandrive.R;
+import com.example.milindmahajan.spartandrive.utils.DateUtil;
+
 /**
  * Created by milind.mahajan on 11/28/15.
  */
 public class DropboxItem {
 
-    String id;
     String name;
     String path;
     String shareLink;
     boolean isFile;
-    String created;
     String modified;
+    String description;
 
 
-    public void setId (String id) {
+    public DropboxItem(DropboxAPI.Entry entry) {
 
-        this.id = id;
-    }
-
-    public String getId () {
-
-        return this.id;
+        this.setName(entry.fileName());
+        this.setPath(entry.path);
+        this.setShareLink("");
+        this.setFile(entry.isDir);
+        this.setModified(entry.modified);
+        this.setDescription("Description of the Dropbox item");
     }
 
     public void setName (String name) {
@@ -71,16 +74,42 @@ public class DropboxItem {
 
     public String getModified () {
 
-        return this.modified;
+        return DateUtil.convertDate(this.modified);
     }
 
-    public void setCreated (String created) {
 
-        this.created = created;
+    public void setDescription (String description) {
+
+        this.description = description;
     }
 
-    public String getCreated () {
+    public String getDescription () {
 
-        return this.created;
+        return this.description;
     }
+
+    public int getIcon () {
+
+        int dotIndex = this.getPath().lastIndexOf(".");
+        String fileExt = this.getPath().substring(dotIndex, this.getPath().length()-1);
+
+        if (fileExt.toLowerCase().contains("doc".toLowerCase())) {
+
+            return R.drawable.doc_icon;
+        } else if(fileExt.toLowerCase().contains("xls".toLowerCase())) {
+
+            return R.drawable.xls_icon;
+        } else if(fileExt.toLowerCase().contains("pdf".toLowerCase())) {
+
+            return R.drawable.pdf_icon;
+        } else if(fileExt.toLowerCase().contains("ppt".toLowerCase())) {
+
+            return R.drawable.ppt_icon;
+        } else {
+
+            return R.drawable.def_icon;
+        }
+    }
+
+
 }
