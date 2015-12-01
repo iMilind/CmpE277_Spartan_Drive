@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ActionMode;
@@ -313,7 +314,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
     }
 
-    public void viewDropboxItem(DropboxItem dropboxItem) {
+    public void viewDropboxItem(final DropboxItem dropboxItem) {
 
         ShareTask f = (ShareTask) new ShareTask(MainActivity.this, new ShareTask.AsyncResponse() {
 
@@ -322,8 +323,9 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
                 if (result != null) {
 
+                    dropboxItem.setShareLink(result);
                     Intent filePreviewIntent = new Intent(getApplicationContext(), FilePreviewActivity.class);
-                    filePreviewIntent.putExtra("previewUrl", result);
+                    filePreviewIntent.putExtra("dropboxItem", dropboxItem);
                     startActivity(filePreviewIntent);
                 }
             }

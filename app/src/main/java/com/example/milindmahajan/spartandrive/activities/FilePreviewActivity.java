@@ -9,10 +9,11 @@ import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 import com.example.milindmahajan.spartandrive.R;
+import com.example.milindmahajan.spartandrive.model.DropboxItem;
 
 public class FilePreviewActivity extends AppCompatActivity {
 
-    String previewUrl;
+    DropboxItem dropboxItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,8 +24,10 @@ public class FilePreviewActivity extends AppCompatActivity {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
 
-            previewUrl = extras.getString("previewUrl");
+            dropboxItem = extras.getParcelable("dropboxItem");
         }
+
+        setTitle(dropboxItem.getName());
     }
 
     @Override
@@ -48,7 +51,7 @@ public class FilePreviewActivity extends AppCompatActivity {
             }
         });
 
-        webView.loadUrl(previewUrl);
+        webView.loadUrl(dropboxItem.getShareLink());
     }
 
     @Override
