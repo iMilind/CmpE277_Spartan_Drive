@@ -49,6 +49,7 @@ public class ListViewFragment extends Fragment {
         public void didSelectDropboxItem(DropboxItem dropboxItem);
 
         public void deleteDropboxItems(ArrayList <DropboxItem> toBeDeleted);
+        public void shareFromDropbox(ArrayList <DropboxItem> toBeShared);
 
         public void beginContextualActionMode(ArrayList <DropboxItem> selectedItems);
         public void endContextualActionMode();
@@ -157,6 +158,9 @@ public class ListViewFragment extends Fragment {
 
             case CONTEXTMENU_OPTION_SHARE:
 
+                ArrayList <DropboxItem> selectedItemToShare = new ArrayList<DropboxItem>();
+                selectedItemToShare.add(this.dropboxItems.get(contextMenuInfo.position));
+                listViewFragmentListener.shareFromDropbox(selectedItemToShare);
                 break;
 
             case CONTEXTMENU_OPTION_DOWNLOAD:
@@ -179,9 +183,9 @@ public class ListViewFragment extends Fragment {
         return true;
     }
 
-    private void addClickListener(){
+    private void addClickListener() {
 
-        ListView listView = (ListView)parentView.findViewById(R.id.list_view);
+        ListView listView = (ListView) parentView.findViewById(R.id.list_view);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override

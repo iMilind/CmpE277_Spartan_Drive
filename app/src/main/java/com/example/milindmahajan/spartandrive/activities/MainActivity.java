@@ -24,6 +24,7 @@ import com.example.milindmahajan.spartandrive.utils.FileTasks;
 import com.example.milindmahajan.spartandrive.utils.ListFilesTask;
 import com.example.milindmahajan.spartandrive.utils.ShareTask;
 
+
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements ListViewFragment.ListViewFragmentProtocol {
@@ -212,6 +213,9 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
                     deleteFromDropbox(listViewFragment.selectedDropboxItems());
 
                 case R.id.item_share:
+                    ListViewFragment listViewFragment1 = (ListViewFragment)getSupportFragmentManager()
+                            .findFragmentById(R.id.list_view_fragment);
+                    shareFromDropbox(listViewFragment1.selectedDropboxItems());
 
                 case R.id.item_download:
 
@@ -264,21 +268,23 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
         }
     }
 
-    private void shareFromDropbox(ArrayList <String> dropboxItems) {
-        for (String path : dropboxItems) {
+    public void shareFromDropbox(ArrayList<DropboxItem> dropboxItems) {
+        for (DropboxItem item : dropboxItems) {
             ShareTask f = (ShareTask) new ShareTask(MainActivity.this, new ShareTask.AsyncResponse() {
                 @Override
                 public void processFinish(String result) {
                     if (result != null) {
                         Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:deepakrkole@gmail.com?subject=" +
-                                Uri.encode("my subject") + "&body=" +
-                                Uri.encode("My big long body with spaces, new lines, and all sorts of invalid URI characters")));
+                                Uri.encode("File shared from SpartaDrive") + "&body=" +
+                                Uri.encode(result)));
                         startActivity(intent);
                     }
                 }
-            }).execute("/SpartanDrive", path);
+            }).execute("/SpartanDrive", item.getPath());
         }
     }
+
+
 
     public void createDIR() throws DropboxException {
 
