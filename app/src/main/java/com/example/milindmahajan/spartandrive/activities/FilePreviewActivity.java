@@ -7,8 +7,6 @@ import android.webkit.WebView;
 
 import com.example.milindmahajan.spartandrive.R;
 
-import java.net.URL;
-
 public class FilePreviewActivity extends AppCompatActivity {
 
     String previewUrl;

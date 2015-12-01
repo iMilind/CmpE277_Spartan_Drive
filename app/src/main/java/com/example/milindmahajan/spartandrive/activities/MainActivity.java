@@ -204,7 +204,10 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
                 case R.id.item_delete:
 
-//                    deleteFromDropbox(listViewAdapter.getSelectedFiles());
+                    ListViewFragment listViewFragment = (ListViewFragment)getSupportFragmentManager()
+                            .findFragmentById(R.id.list_view_fragment);
+
+                    deleteFromDropbox(listViewFragment.selectedDropboxItems());
 
                 case R.id.item_share:
 
@@ -240,19 +243,22 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
         }
     }
 
-    private void deleteFromDropbox(ArrayList <String> dropboxItems) {
+    private void deleteFromDropbox(ArrayList <DropboxItem> dropboxItems) {
 
-        for (String path : dropboxItems) {
-            FileTasks f = (FileTasks) new FileTasks(MainActivity.this, new FileTasks.AsyncResponse() {
+        for (DropboxItem item : dropboxItems) {
+
+            FileTasks f = (FileTasks) new FileTasks(MainActivity.this,
+                    new FileTasks.AsyncResponse() {
+
                 @Override
                 public void processFinish(boolean result) {
 
-                    if(result)
-                    {
+                    if(result) {
+
                         refreshList("/SpartanDrive");
                     }
                 }
-            }).execute(Common.METHOD_DELETE,path);
+            }).execute(Common.METHOD_DELETE, item.getPath());
         }
     }
 
@@ -299,5 +305,10 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
     public void endContextualActionMode() {
 
         actionMode.finish();
+    }
+
+    public void deleteDropboxItems(ArrayList <DropboxItem> toBeDeleted) {
+
+        deleteFromDropbox(toBeDeleted);
     }
 }
