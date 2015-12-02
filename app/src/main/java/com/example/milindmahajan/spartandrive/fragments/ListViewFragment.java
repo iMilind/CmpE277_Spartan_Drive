@@ -51,6 +51,9 @@ public class ListViewFragment extends Fragment {
         public void deleteDropboxItems(ArrayList <DropboxItem> toBeDeleted);
         public void shareFromDropbox(ArrayList <DropboxItem> toBeShared);
 
+        public void moveDropboxItem(ArrayList <DropboxItem> toBeMoved);
+        public void copyDropboxItem(ArrayList <DropboxItem> toBeMoved);
+
         public void beginContextualActionMode(ArrayList <DropboxItem> selectedItems);
         public void endContextualActionMode();
     }
@@ -152,9 +155,9 @@ public class ListViewFragment extends Fragment {
 
             case CONTEXTMENU_OPTION_DELETE:
 
-                ArrayList <DropboxItem> selectedItem = new ArrayList<DropboxItem>();
-                selectedItem.add(this.dropboxItems.get(contextMenuInfo.position));
-                listViewFragmentListener.deleteDropboxItems(selectedItem);
+                ArrayList <DropboxItem> itemsToDelete = new ArrayList<DropboxItem>();
+                itemsToDelete.add(this.dropboxItems.get(contextMenuInfo.position));
+                listViewFragmentListener.deleteDropboxItems(itemsToDelete);
                 break;
 
             case CONTEXTMENU_OPTION_SHARE:
@@ -170,10 +173,16 @@ public class ListViewFragment extends Fragment {
 
             case CONTEXTMENU_OPTION_MOVE:
 
+                ArrayList <DropboxItem> itemsToMove = new ArrayList<DropboxItem>();
+                itemsToMove.add(this.dropboxItems.get(contextMenuInfo.position));
+                listViewFragmentListener.moveDropboxItem(itemsToMove);
                 break;
 
             case CONTEXTMENU_OPTION_COPY:
 
+                ArrayList <DropboxItem> itemsToCopy = new ArrayList<DropboxItem>();
+                itemsToCopy.add(this.dropboxItems.get(contextMenuInfo.position));
+                listViewFragmentListener.copyDropboxItem(itemsToCopy);
                 break;
 
             case CONTEXTMENU_OPTION_CANCEL:

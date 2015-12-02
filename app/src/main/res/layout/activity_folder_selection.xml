@@ -6,7 +6,7 @@
     >
 
     <ListView
-        android:id="@+id/list_view"
+        android:id="@+id/select_folder_list_view"
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:dividerHeight="5dp"
