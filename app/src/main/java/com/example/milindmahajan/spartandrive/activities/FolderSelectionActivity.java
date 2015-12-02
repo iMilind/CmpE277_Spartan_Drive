@@ -27,6 +27,7 @@ import java.util.List;
 
 public class FolderSelectionActivity extends AppCompatActivity {
 
+    DropboxItem selectedItem = new DropboxItem();
     String selectedPath = new String();
     ArrayList<DropboxItem> dropboxItems = new ArrayList<DropboxItem>();
     private ListViewAdapter listViewAdapter;
@@ -38,6 +39,12 @@ public class FolderSelectionActivity extends AppCompatActivity {
         setContentView(R.layout.activity_folder_selection);
 
         addClickListener();
+
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+
+            selectedItem = extras.getParcelable("parentFolder");
+        }
     }
 
     @Override
@@ -143,25 +150,33 @@ public class FolderSelectionActivity extends AppCompatActivity {
             @Override
             public void processFinish(ArrayList<DropboxAPI.Entry> output) {
 
-
                 for(DropboxAPI.Entry e : output) {
 
+                    DropboxItem dropboxItem = new DropboxItem(e);
                     if (e.isDir) {
-
-                        DropboxItem dropboxItem = new DropboxItem(e);
 
                         refreshList(dropboxItem.getPath());
                         result.add(dropboxItem);
                     }
                 }
 
-                reloadListView(result);
+                if (result.size() != 0) {
+
+                    reloadListView(result);
+                }
             }
         }).execute(path);
     }
 
     public void reloadListView (ArrayList<DropboxItem> dropboxItems) {
 
+        if (selectedItem.isDir()) {
+
+            /** remove self and children dirs from this.dropboxItems    **/
+        } else {
+
+            /** remove self dir this.dropboxItems   **/
+        }
         this.dropboxItems.removeAll(this.dropboxItems);
         this.dropboxItems.addAll(dropboxItems);
 

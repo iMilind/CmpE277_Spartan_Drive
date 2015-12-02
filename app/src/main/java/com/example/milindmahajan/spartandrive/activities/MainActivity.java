@@ -7,16 +7,11 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
-import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import com.dropbox.client2.DropboxAPI;
@@ -33,7 +28,6 @@ import com.example.milindmahajan.spartandrive.utils.FileTasks;
 import com.example.milindmahajan.spartandrive.utils.ListFilesTask;
 import com.example.milindmahajan.spartandrive.utils.ShareTask;
 
-
 import java.io.InputStream;
 import java.util.ArrayList;
 
@@ -43,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
     private static final int FOLDER_SELECT_ACTIVITY_RESULT_MOVE = 13;
     private static final int FOLDER_SELECT_ACTIVITY_RESULT_COPY = 14;
+    public static final int CANNOT_BE_MOVED = 15;
 
     private static final int CONTEXTMENU_OPTION_VIEW = 1;
     private static final int CONTEXTMENU_OPTION_DELETE = 2;
@@ -201,17 +196,30 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
                 Log.d("intent_result","reached here");
             }
-            if (requestCode == FOLDER_SELECT_ACTIVITY_RESULT_MOVE && resultCode == MainActivity.RESULT_OK) {
+            if (requestCode == FOLDER_SELECT_ACTIVITY_RESULT_MOVE) {
 
-                selectedFolderPath = new String( data.getStringExtra("folderPath"));
+                if (resultCode == MainActivity.RESULT_OK) {
 
-                moveDropboxItems(toBeMovedItems, selectedFolderPath);
+                    selectedFolderPath = new String( data.getStringExtra("folderPath"));
+
+                    moveDropboxItems(toBeMovedItems, selectedFolderPath);
+                } else if (resultCode == MainActivity.CANNOT_BE_MOVED) {
+
+                    showToast("Cannot be moved!");
+                }
             }
             if (requestCode == FOLDER_SELECT_ACTIVITY_RESULT_COPY && resultCode == MainActivity.RESULT_OK) {
 
-                selectedFolderPath = new String( data.getStringExtra("folderPath"));
 
-                copyDropboxItems(toBeMovedItems, selectedFolderPath);
+                if (resultCode == MainActivity.RESULT_OK) {
+
+                    selectedFolderPath = new String( data.getStringExtra("folderPath"));
+
+                    copyDropboxItems(toBeMovedItems, selectedFolderPath);
+                } else if (resultCode == MainActivity.CANNOT_BE_MOVED) {
+
+                    showToast("Cannot be copied!");
+                }
             }
         }
         catch(Exception e)
@@ -613,6 +621,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
         toBeMovedItems.removeAll(toBeMovedItems);
         toBeMovedItems.addAll(toBeMoved);
         Intent folderSelectIntent = new Intent(getApplicationContext(), FolderSelectionActivity.class);
+        folderSelectIntent.putExtra("parentFolder", toBeMoved.get(0));
         startActivityForResult(folderSelectIntent, intentCode);
     }
 }
