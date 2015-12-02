@@ -13,6 +13,9 @@ import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.dropbox.client2.DropboxAPI;
@@ -204,7 +207,6 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
         });
     }
 
-    private boolean mLoggedIn, onResume;
     private AndroidAuthSession buildSession() {
 
         AppKeyPair appKeyPair = new AppKeyPair(Common.APP_KEY, Common.APP_SECRET);
