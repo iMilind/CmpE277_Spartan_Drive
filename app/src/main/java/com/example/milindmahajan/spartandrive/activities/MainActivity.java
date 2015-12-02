@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
     private ActionMode actionMode;
 
-    DropboxItem rootFolder = new DropboxItem();
+    private DropboxItem rootFolder = new DropboxItem();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +58,18 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
             rootFolder.setPath(Common.rootDIR);
         }
 
-        setTitle(rootFolder.getName());
+        try {
+
+            setTitle(rootFolder.getName());
+        } catch (Exception exc) {
+
+            rootFolder = new DropboxItem();
+
+            rootFolder.setName("Spartan Drive");
+            rootFolder.setPath(Common.rootDIR);
+
+            setTitle(rootFolder.getName());
+        }
     }
 
     @Override
@@ -289,19 +300,42 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
         }
     }
 
-    public void shareFromDropbox(ArrayList<DropboxItem> dropboxItems) {
+    public void shareFromDropbox(final ArrayList<DropboxItem> dropboxItems) {
+
+        final ArrayList <String> shareUrls = new ArrayList<String>();
         for (DropboxItem item : dropboxItems) {
+
             ShareTask f = (ShareTask) new ShareTask(MainActivity.this, new ShareTask.AsyncResponse() {
+
                 @Override
                 public void processFinish(String result) {
+
                     if (result != null) {
-                        Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:deepakrkole@gmail.com?subject=" +
-                                Uri.encode("File shared from SpartaDrive") + "&body=" +
-                                Uri.encode(result)));
-                        startActivity(intent);
+
+                        shareUrls.add(result);
+
+                        if (shareUrls.size() == dropboxItems.size()) {
+
+                            StringBuilder builder = new StringBuilder();
+                            for(int i = 0; i < shareUrls.size(); i++) {
+
+                                if (i < shareUrls.size()-1) {
+
+                                    builder.append(shareUrls.get(i)).append(", ");
+                                } else {
+
+                                    builder.append(shareUrls.get(i));
+                                }
+                            }
+
+                            Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:deepakrkole@gmail.com?subject=" +
+                                    Uri.encode("File shared from SpartaDrive") + "&body=" +
+                                    Uri.encode(builder.toString())));
+                            startActivity(intent);
+                        }
                     }
                 }
-            }).execute("/SpartanDrive", item.getPath());
+            }).execute(item);
         }
     }
 
@@ -350,7 +384,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
                     startActivity(filePreviewIntent);
                 }
             }
-        }).execute(rootFolder.getPath(), dropboxItem.getPath());
+        }).execute(dropboxItem);
     }
 
     public void openFolder (DropboxItem dropboxItem) {

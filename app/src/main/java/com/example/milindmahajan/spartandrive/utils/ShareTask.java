@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.exception.DropboxException;
+import com.example.milindmahajan.spartandrive.model.DropboxItem;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,7 +19,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
-public class ShareTask extends AsyncTask<String, Void, String> {
+public class ShareTask extends AsyncTask<DropboxItem, Void, String> {
 
     private DropboxAPI<?> dropbox;
     private Context context;
@@ -66,28 +67,15 @@ public class ShareTask extends AsyncTask<String, Void, String> {
     }
 
     @Override
-    protected String doInBackground(String... params) {
+    protected String doInBackground(DropboxItem... params) {
 
         try {
 
-            String method = params[0];
             dropbox = Common.getDropboxObj();
-            DropboxAPI.Entry dir = dropbox.metadata(params[0], 1000, null, true, null);
-            Log.i("Directory", dir.toString());
-
-            for (DropboxAPI.Entry e : dir.contents) {
-
-                Log.i("Files", e.fileName().toString());
-                shareAddress = null;
-                if (!e.isDir && e.path.toString().equals(params[1])) {
-
-                    DropboxAPI.DropboxLink shareLink = dropbox.share(e.path);
-                    shareAddress = getShareURL(shareLink.url).replaceFirst("https://www", "https://dl");
-                    Log.d("XXXXXX", "dropbox share link " + shareAddress);
-                    break;
-                }
-        }
-    } catch (DropboxException e) {
+            DropboxAPI.DropboxLink shareLink = dropbox.share(params[0].getPath());
+            shareAddress = getShareURL(shareLink.url).replaceFirst("https://www", "https://dl");
+            Log.d("XXXXXX", "dropbox share link " + shareAddress);
+        } catch (DropboxException e) {
 
             Log.i("File Dropbox Operation", "Exception: ", e);
             e.printStackTrace();
