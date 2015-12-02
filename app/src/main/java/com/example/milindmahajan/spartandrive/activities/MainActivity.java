@@ -60,14 +60,6 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-        if(!mLoggedIn)
-        {
-            AndroidAuthSession session = buildSession();
-            Common.setDropboxObj(new DropboxAPI<AndroidAuthSession>(session));
-            Common.getDropboxObj().getSession().startOAuth2Authentication(MainActivity.this);
-        }
-
         if (!ApplicationSettings.getSharedSettings().isAuthenticated()) {
 
 
@@ -190,23 +182,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
         }
 
     }
-
-
-
-    private void addClickListener(){
-
-        ListView listView = (ListView)findViewById(R.id.list_view);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> av, View v, int pos,
-                                    long id) {
-
-                System.out.println("onItemClick Adapter View Favorite fragment");
-            }
-        });
-    }
-
+    
     private AndroidAuthSession buildSession() {
 
         AppKeyPair appKeyPair = new AppKeyPair(Common.APP_KEY, Common.APP_SECRET);
