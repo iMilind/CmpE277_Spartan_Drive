@@ -4,7 +4,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -17,6 +19,7 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.dropbox.client2.DropboxAPI;
 import com.example.milindmahajan.spartandrive.R;
@@ -29,7 +32,7 @@ import java.util.List;
 
 public class FolderSelectionActivity extends AppCompatActivity {
 
-    String selectedPath;
+    String selectedPath = new String();
     ArrayList<DropboxItem> dropboxItems = new ArrayList<DropboxItem>();
     private ListViewAdapter listViewAdapter;
 
@@ -90,7 +93,8 @@ public class FolderSelectionActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> av, View v, int pos,
                                     long id) {
 
-                selectedPath = new String(dropboxItems.get(pos).getPath());
+                CheckBox checkBox = (CheckBox)v.findViewById(R.id.select_folder_checkBox);
+                checkBox.setChecked(!checkBox.isChecked());
             }
         });
     }
@@ -112,25 +116,8 @@ public class FolderSelectionActivity extends AppCompatActivity {
             finish();
         } else {
 
-            new AlertDialog.Builder(getApplicationContext())
-                    .setTitle("Error!")
-                    .setMessage("No folder selected")
-                    .setPositiveButton(android.R.string.yes,
-                            new DialogInterface.OnClickListener() {
-
-                        public void onClick(DialogInterface dialog, int which) {
-
-                        }
-                    })
-                    .setNegativeButton(android.R.string.no,
-                            new DialogInterface.OnClickListener() {
-
-                        public void onClick(DialogInterface dialog, int which) {
-
-                        }
-                    })
-                    .setIcon(android.R.drawable.ic_dialog_alert)
-                    .show();
+            Toast error = Toast.makeText(this, "No folder selected!", Toast.LENGTH_LONG);
+            error.show();
         }
     }
 
@@ -177,7 +164,7 @@ public class FolderSelectionActivity extends AppCompatActivity {
         listView.setAdapter(listViewAdapter);
     }
 
-    private class ListViewAdapter extends ArrayAdapter<DropboxItem> {
+    private class ListViewAdapter extends ArrayAdapter<DropboxItem> implements Checkable {
 
         public ListViewAdapter(Context context, int resource, int textViewResourceId, List<DropboxItem> objects) {
 
@@ -192,6 +179,7 @@ public class FolderSelectionActivity extends AppCompatActivity {
                 convertView = getLayoutInflater().inflate(R.layout.dropbox_folder_item, parent, false);
             }
 
+            convertView.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), android.R.color.white));
             final DropboxItem dropboxItem = dropboxItems.get(position);
 
             ImageView imageView = (ImageView)convertView.findViewById(R.id.select_folder_icon);
@@ -202,6 +190,7 @@ public class FolderSelectionActivity extends AppCompatActivity {
 
             final CheckBox checkBox = (CheckBox)convertView.findViewById(R.id.select_folder_checkBox);
 
+            final View finalConvertView = convertView;
             checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
                 @Override
@@ -209,15 +198,37 @@ public class FolderSelectionActivity extends AppCompatActivity {
 
                     if(isChecked) {
 
-                        selectedPath = new String(dropboxItem.getPath());
+                        finalConvertView.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), android.R.color.holo_red_light));
+                        selectedPath = dropboxItem.getPath();
                     } else {
 
-                        selectedPath = new String();
+                        finalConvertView.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), android.R.color.white));
                     }
                 }
             });
 
             return convertView;
         }
+
+        private boolean isChecked;
+        private List<Checkable> checkableViews;
+
+        public boolean isChecked() {
+            return isChecked;
+        }
+
+        public void setChecked(boolean isChecked) {
+            this.isChecked = isChecked;
+            for (Checkable c : checkableViews) {
+                c.setChecked(isChecked);
+            }
+        }
+        public void toggle() {
+            this.isChecked = !this.isChecked;
+            for (Checkable c : checkableViews) {
+                c.toggle();
+            }
+        }
+
     }
 }
