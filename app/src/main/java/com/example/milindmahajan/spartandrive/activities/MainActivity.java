@@ -244,18 +244,31 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
                     deleteFromDropbox(listViewFragment.selectedDropboxItems());
 
+                    mode.finish();
+                    return true;
+
                 case R.id.item_share:
                     ListViewFragment listViewFragment1 = (ListViewFragment)getSupportFragmentManager()
                             .findFragmentById(R.id.list_view_fragment);
                     shareFromDropbox(listViewFragment1.selectedDropboxItems());
 
+                    mode.finish();
+                    return true;
+
                 case R.id.item_download:
 
+                    mode.finish();
+                    return true;
+
                 case R.id.item_move:
+
+                    mode.finish();
+                    return true;
 
                 case R.id.item_copy:
 
                     mode.finish();
+                    return true;
             }
 
             return false;
@@ -281,7 +294,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
         }
     }
 
-    private void deleteFromDropbox(ArrayList <DropboxItem> dropboxItems) {
+    private void deleteFromDropbox(final ArrayList <DropboxItem> dropboxItems) {
 
         for (DropboxItem item : dropboxItems) {
 
@@ -293,7 +306,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
                     if(result) {
 
-                        refreshList(rootFolder.getPath());
+                            refreshList(rootFolder.getPath());
                     }
                 }
             }).execute(Common.METHOD_DELETE, item.getPath());
