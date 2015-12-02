@@ -1,19 +1,13 @@
 package com.example.milindmahajan.spartandrive.activities;
 
-<<<<<<< HEAD
 import android.app.Activity;
 import android.content.Context;
-=======
->>>>>>> dev
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-<<<<<<< HEAD
 import android.provider.MediaStore;
-=======
 import android.os.Parcelable;
->>>>>>> dev
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ActionMode;
@@ -43,7 +37,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
     private ActionMode actionMode;
 
-<<<<<<< HEAD
+
     private static final int CONTEXTMENU_OPTION_VIEW = 1;
     private static final int CONTEXTMENU_OPTION_DELETE = 2;
     private static final int CONTEXTMENU_OPTION_SHARE = 3;
@@ -53,9 +47,9 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
     private static final int CONTEXTMENU_OPTION_CANCEL = 7;
     private boolean mLoggedIn, onResume;
     private int PICK_IMAGE;
-=======
+
     private DropboxItem rootFolder = new DropboxItem();
->>>>>>> dev
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,16 +57,16 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-<<<<<<< HEAD
+
         if(!mLoggedIn)
         {
             AndroidAuthSession session = buildSession();
             Common.setDropboxObj(new DropboxAPI<AndroidAuthSession>(session));
             Common.getDropboxObj().getSession().startOAuth2Authentication(MainActivity.this);
         }
-=======
+
         if (!ApplicationSettings.getSharedSettings().isAuthenticated()) {
->>>>>>> dev
+
 
             AndroidAuthSession session = buildSession();
             Common.setDropboxObj(new DropboxAPI<AndroidAuthSession>(session));
