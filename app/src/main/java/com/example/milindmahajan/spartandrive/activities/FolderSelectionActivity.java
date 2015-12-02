@@ -170,17 +170,50 @@ public class FolderSelectionActivity extends AppCompatActivity {
 
     public void reloadListView (ArrayList<DropboxItem> dropboxItems) {
 
+        ArrayList <DropboxItem> temp = new ArrayList<>(dropboxItems);
         if (selectedItem.isDir()) {
 
             /** remove self and children dirs from this.dropboxItems    **/
+            temp = removeChilren(dropboxItems);
         } else {
 
             /** remove self dir this.dropboxItems   **/
+            temp = removeParent(dropboxItems);
         }
         this.dropboxItems.removeAll(this.dropboxItems);
-        this.dropboxItems.addAll(dropboxItems);
+        this.dropboxItems.addAll(temp);
 
         reloadData(this.dropboxItems);
+    }
+
+    private ArrayList<DropboxItem> removeChilren(ArrayList<DropboxItem> items) {
+
+        for (int i = 0; i < items.size(); i++) {
+
+            DropboxItem item = items.get(i);
+
+            if (item.getPath().startsWith(selectedItem.getPath())) {
+
+                items.remove(i);
+            }
+        }
+
+        return items;
+    }
+
+    private ArrayList<DropboxItem> removeParent(ArrayList<DropboxItem> items) {
+
+        for (int i = 0; i < items.size(); i++) {
+
+            DropboxItem item = items.get(i);
+
+            if (selectedItem.getParentPath().equals(item.getPath()+"/")) {
+
+                items.remove(i);
+            }
+        }
+
+        return items;
     }
 
     private void reloadData(ArrayList <DropboxItem> dropboxItems) {

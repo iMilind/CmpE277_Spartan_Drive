@@ -15,7 +15,7 @@ public class DropboxItem implements Parcelable {
     String name;
     String path;
     String shareLink;
-    boolean isDir;
+    String isDir;
     String modified;
     String parentPath;
 
@@ -66,12 +66,12 @@ public class DropboxItem implements Parcelable {
 
     public void setDir(boolean isDir) {
 
-        this.isDir = isDir;
+        this.isDir = String.valueOf(isDir);
     }
 
     public boolean isDir() {
 
-        return this.isDir;
+        return Boolean.valueOf(this.isDir);
     }
 
     public void setModified(String modified) {
@@ -134,6 +134,7 @@ public class DropboxItem implements Parcelable {
         parcel.writeString(shareLink);
         parcel.writeString(modified);
         parcel.writeString(parentPath);
+        parcel.writeString(isDir);
     }
 
     public static final Parcelable.Creator<DropboxItem> CREATOR = new Creator<DropboxItem>() {
@@ -147,6 +148,7 @@ public class DropboxItem implements Parcelable {
             dropboxItem.setShareLink(source.readString());
             dropboxItem.setModified(source.readString());
             dropboxItem.setParentPath(source.readString());
+            dropboxItem.setDir(Boolean.valueOf(source.readString()));
 
             return dropboxItem;
         }
