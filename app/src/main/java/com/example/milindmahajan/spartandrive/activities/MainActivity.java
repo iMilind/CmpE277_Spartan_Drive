@@ -1,26 +1,24 @@
 package com.example.milindmahajan.spartandrive.activities;
 
+<<<<<<< HEAD
 import android.app.Activity;
 import android.content.Context;
+=======
+>>>>>>> dev
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
+<<<<<<< HEAD
 import android.provider.MediaStore;
+=======
+import android.os.Parcelable;
+>>>>>>> dev
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ActionMode;
-import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dropbox.client2.DropboxAPI;
@@ -29,20 +27,23 @@ import com.dropbox.client2.exception.DropboxException;
 import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
 import com.example.milindmahajan.spartandrive.R;
+import com.example.milindmahajan.spartandrive.fragments.ListViewFragment;
+import com.example.milindmahajan.spartandrive.model.DropboxItem;
+import com.example.milindmahajan.spartandrive.singletons.ApplicationSettings;
 import com.example.milindmahajan.spartandrive.utils.Common;
 import com.example.milindmahajan.spartandrive.utils.FileTasks;
 import com.example.milindmahajan.spartandrive.utils.ListFilesTask;
+import com.example.milindmahajan.spartandrive.utils.ShareTask;
+
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ListViewFragment.ListViewFragmentProtocol {
 
-    private ArrayList<String> results = new ArrayList<String>();
-    private ListViewAdapter listViewAdapter;
     private ActionMode actionMode;
 
+<<<<<<< HEAD
     private static final int CONTEXTMENU_OPTION_VIEW = 1;
     private static final int CONTEXTMENU_OPTION_DELETE = 2;
     private static final int CONTEXTMENU_OPTION_SHARE = 3;
@@ -52,6 +53,9 @@ public class MainActivity extends AppCompatActivity {
     private static final int CONTEXTMENU_OPTION_CANCEL = 7;
     private boolean mLoggedIn, onResume;
     private int PICK_IMAGE;
+=======
+    private DropboxItem rootFolder = new DropboxItem();
+>>>>>>> dev
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,89 +63,50 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+<<<<<<< HEAD
         if(!mLoggedIn)
         {
             AndroidAuthSession session = buildSession();
             Common.setDropboxObj(new DropboxAPI<AndroidAuthSession>(session));
             Common.getDropboxObj().getSession().startOAuth2Authentication(MainActivity.this);
         }
+=======
+        if (!ApplicationSettings.getSharedSettings().isAuthenticated()) {
+>>>>>>> dev
 
-        ListView listView = (ListView)findViewById(R.id.list_view);
-        registerForContextMenu(listView);
+            AndroidAuthSession session = buildSession();
+            Common.setDropboxObj(new DropboxAPI<AndroidAuthSession>(session));
+            Common.getDropboxObj().getSession().startOAuth2Authentication(MainActivity.this);
+        }
 
-        addClickListener();
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+
+            rootFolder = extras.getParcelable("rootFolder");
+        } else {
+
+            rootFolder.setName("Spartan Drive");
+            rootFolder.setPath(Common.rootDIR);
+        }
+
+        try {
+
+            setTitle(rootFolder.getName());
+        } catch (Exception exc) {
+
+            rootFolder = new DropboxItem();
+
+            rootFolder.setName("Spartan Drive");
+            rootFolder.setPath(Common.rootDIR);
+
+            setTitle(rootFolder.getName());
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-
-        super.onCreateContextMenu(menu, v, menuInfo);
-
-        AdapterView.AdapterContextMenuInfo contextMenuInfo = (AdapterView.AdapterContextMenuInfo) menuInfo;
-        menu.setHeaderTitle(this.results.get(contextMenuInfo.position));
-
-        menu.add(Menu.NONE, CONTEXTMENU_OPTION_VIEW, 0, "View");
-        menu.add(Menu.NONE, CONTEXTMENU_OPTION_DELETE, 1, "Delete");
-        menu.add(Menu.NONE, CONTEXTMENU_OPTION_SHARE, 2, "Share");
-        menu.add(Menu.NONE, CONTEXTMENU_OPTION_DOWNLOAD, 3, "Download");
-        menu.add(Menu.NONE, CONTEXTMENU_OPTION_MOVE, 4, "Move");
-        menu.add(Menu.NONE, CONTEXTMENU_OPTION_COPY, 5, "Copy");
-        menu.add(Menu.NONE, CONTEXTMENU_OPTION_CANCEL, 6, "Cancel");
-    }
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-
-        AdapterView.AdapterContextMenuInfo contextMenuInfo = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
-
-        switch (item.getItemId()) {
-
-            case CONTEXTMENU_OPTION_VIEW:
-
-                showToast("View");
-                break;
-
-            case CONTEXTMENU_OPTION_DELETE:
-
-                ArrayList <String> selectedItem = new ArrayList<String>();
-                selectedItem.add(this.results.get(contextMenuInfo.position));
-                deleteFromDropbox(selectedItem);
-
-                break;
-
-            case CONTEXTMENU_OPTION_SHARE:
-
-                showToast("Share");
-                break;
-
-            case CONTEXTMENU_OPTION_DOWNLOAD:
-
-                showToast("Download");
-                break;
-
-            case CONTEXTMENU_OPTION_MOVE:
-
-                showToast("Move");
-                break;
-
-            case CONTEXTMENU_OPTION_COPY:
-
-                showToast("Copy");
-                break;
-
-            case CONTEXTMENU_OPTION_CANCEL:
-
-                showToast("Cancel");
-                break;
-        }
-
         return true;
     }
 
@@ -230,6 +195,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+
     private void addClickListener(){
 
         ListView listView = (ListView)findViewById(R.id.list_view);
@@ -244,9 +210,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-
-
-
+    private boolean mLoggedIn, onResume;
     private AndroidAuthSession buildSession() {
 
         AppKeyPair appKeyPair = new AppKeyPair(Common.APP_KEY, Common.APP_SECRET);
@@ -288,6 +252,7 @@ public class MainActivity extends AppCompatActivity {
                         + e.getLocalizedMessage());
             }
         }
+
         if(mLoggedIn)
         {
             try
@@ -299,9 +264,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.i("DbAuthLog", "Error creating SpartanDrive Folder..", e);
                 showToast("Error creating SpartanDrive Folder..Please contact Administrator");
             }
-
-
-            //refreshList(Common.rootDIR);
         }
 
     }
@@ -315,6 +277,7 @@ public class MainActivity extends AppCompatActivity {
     public void setLoggedIn(boolean loggedIn) {
 
         mLoggedIn = loggedIn;
+        ApplicationSettings.getSharedSettings().setAuthenticated(loggedIn);
         if (loggedIn) {
 
             onResume = false;
@@ -325,19 +288,24 @@ public class MainActivity extends AppCompatActivity {
     public void refreshList(String path)
     {
         ListFilesTask t = (ListFilesTask) new ListFilesTask(new ListFilesTask.AsyncResponse() {
+
             @Override
             public void processFinish(ArrayList<DropboxAPI.Entry> output) {
-                ArrayList<String> result = new ArrayList<String>();
+                ArrayList<DropboxItem> result = new ArrayList<DropboxItem>();
 
 
-                for(DropboxAPI.Entry e : output)
-                {
-                    result.add(e.path);
+                for(DropboxAPI.Entry e : output) {
+
+                    DropboxItem dropboxItem = new DropboxItem(e);
+                    result.add(dropboxItem);
                 }
-                reloadListView(result);
+                ListViewFragment listViewFragment = (ListViewFragment)getSupportFragmentManager()
+                        .findFragmentById(R.id.list_view_fragment);
+                listViewFragment.reloadListView(result);
             }
         }).execute(path);
     }
+
     private void storeKeys(String key, String secret) {
 
         SharedPreferences prefs = getSharedPreferences(Common.ACCOUNT_PREFS_NAME, 0);
@@ -380,119 +348,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void reloadListView (ArrayList<String> dropboxItems) {
-
-        this.results.removeAll(this.results);
-        this.results.addAll(dropboxItems);
-
-        reloadData(this.results);
-    }
-
-    private void reloadData(ArrayList <String> dropboxItems) {
-
-        listViewAdapter = new ListViewAdapter(getApplicationContext(),
-                R.layout.dropbox_item, 0, dropboxItems);
-
-
-        ListView listView = (ListView)findViewById(R.id.list_view);
-        listView.setAdapter(listViewAdapter);
-    }
-
-    private class ListViewAdapter extends ArrayAdapter<String> {
-
-        ArrayList <String> dropboxItems = new ArrayList<String>();
-        ArrayList <String> selectedFiles = new ArrayList<String>();
-
-        public ListViewAdapter(Context context, int resource, int textViewResourceId, List<String> objects) {
-
-            super(context, resource, textViewResourceId, objects);
-            this.dropboxItems.addAll(objects);
-        }
-
-        public void setNewSelection(String path) {
-
-            selectedFiles.add(path);
-            notifyDataSetChanged();
-        }
-
-        public void removeSelection(String path) {
-
-            for (int i = 0; i < selectedFiles.size(); i++) {
-
-                if (selectedFiles.get(i).equals(path)) {
-
-                    selectedFiles.remove(i);
-                    notifyDataSetChanged();
-
-                    break;
-                }
-            }
-        }
-
-        public ArrayList <String> getSelectedFiles () {
-
-            return this.selectedFiles;
-        }
-
-        public boolean isSelected (String path) {
-
-            for (String file : selectedFiles) {
-
-                if (path.equals(file)) {
-
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        @Override
-        public View getView(final int position, View convertView, ViewGroup parent) {
-
-            if(convertView == null) {
-
-                convertView = MainActivity.this.getLayoutInflater().inflate(R.layout.dropbox_item, parent, false);
-            }
-
-            String searchResult = this.dropboxItems.get(position);
-
-            ImageView imageView = (ImageView)convertView.findViewById(R.id.icon);
-            TextView title = (TextView)convertView.findViewById(R.id.title);
-            title.setText(searchResult);
-            final CheckBox checkBox = (CheckBox)convertView.findViewById(R.id.checkBox);
-            checkBox.setVisibility(View.VISIBLE);
-
-            checkBox.setChecked(listViewAdapter.isSelected(this.dropboxItems.get(position)));
-
-            checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
-                    if(isChecked) {
-
-                        listViewAdapter.setNewSelection(dropboxItems.get(position));
-                    } else {
-
-                        listViewAdapter.removeSelection(dropboxItems.get(position));
-                    }
-
-                    if (listViewAdapter.getSelectedFiles().size() != 0) {
-
-                        actionMode = MainActivity.this.startActionMode(new ActionBarCallBack());
-                    } else {
-
-                        actionMode.finish();
-                    }
-                }
-            });
-
-            return convertView;
-        }
-    }
-
-
     class ActionBarCallBack implements ActionMode.Callback {
 
         @Override
@@ -502,17 +357,36 @@ public class MainActivity extends AppCompatActivity {
 
                 case R.id.item_delete:
 
-                    deleteFromDropbox(listViewAdapter.getSelectedFiles());
+                    ListViewFragment listViewFragment = (ListViewFragment)getSupportFragmentManager()
+                            .findFragmentById(R.id.list_view_fragment);
+
+                    deleteFromDropbox(listViewFragment.selectedDropboxItems());
+
+                    mode.finish();
+                    return true;
 
                 case R.id.item_share:
+                    ListViewFragment listViewFragment1 = (ListViewFragment)getSupportFragmentManager()
+                            .findFragmentById(R.id.list_view_fragment);
+                    shareFromDropbox(listViewFragment1.selectedDropboxItems());
+
+                    mode.finish();
+                    return true;
 
                 case R.id.item_download:
 
+                    mode.finish();
+                    return true;
+
                 case R.id.item_move:
+
+                    mode.finish();
+                    return true;
 
                 case R.id.item_copy:
 
                     mode.finish();
+                    return true;
             }
 
             return false;
@@ -538,45 +412,142 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void deleteFromDropbox(ArrayList <String> dropboxItems) {
+    private void deleteFromDropbox(final ArrayList <DropboxItem> dropboxItems) {
 
-        for (String path : dropboxItems) {
-            FileTasks f = (FileTasks) new FileTasks(MainActivity.this, new FileTasks.AsyncResponse() {
+        for (DropboxItem item : dropboxItems) {
+
+            FileTasks f = (FileTasks) new FileTasks(MainActivity.this,
+                    new FileTasks.AsyncResponse() {
+
                 @Override
                 public void processFinish(boolean result) {
 
-                    if(result)
-                    {
-                        refreshList("/SpartanDrive");
+                    if(result) {
+
+                            refreshList(rootFolder.getPath());
                     }
                 }
-            }).execute(Common.METHOD_DELETE,path);
+            }).execute(Common.METHOD_DELETE, item.getPath());
         }
     }
 
-    public void createDIR() throws DropboxException
-    {
+    public void shareFromDropbox(final ArrayList<DropboxItem> dropboxItems) {
+
+        final ArrayList <String> shareUrls = new ArrayList<String>();
+        for (DropboxItem item : dropboxItems) {
+
+            ShareTask f = (ShareTask) new ShareTask(MainActivity.this, new ShareTask.AsyncResponse() {
+
+                @Override
+                public void processFinish(String result) {
+
+                    if (result != null) {
+
+                        shareUrls.add(result);
+
+                        if (shareUrls.size() == dropboxItems.size()) {
+
+                            StringBuilder builder = new StringBuilder();
+                            for(int i = 0; i < shareUrls.size(); i++) {
+
+                                if (i < shareUrls.size()-1) {
+
+                                    builder.append(shareUrls.get(i)).append(", ");
+                                } else {
+
+                                    builder.append(shareUrls.get(i));
+                                }
+                            }
+
+                            Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:deepakrkole@gmail.com?subject=" +
+                                    Uri.encode("File shared from SpartaDrive") + "&body=" +
+                                    Uri.encode(builder.toString())));
+                            startActivity(intent);
+                        }
+                    }
+                }
+            }).execute(item);
+        }
+    }
+
+
+
+    public void createDIR() throws DropboxException {
 
         ListFilesTask t = (ListFilesTask) new ListFilesTask(new ListFilesTask.AsyncResponse() {
+
             @Override
             public void processFinish(ArrayList<DropboxAPI.Entry> output) {
 
-
                 // SpartanDrive Folder does not exist.. create it
-                if(output.size()==0)
-                {
+                if(output.size()==0) {
+
                     FileTasks f = (FileTasks)new FileTasks(MainActivity.this, new FileTasks.AsyncResponse() {
+
                         @Override
                         public void processFinish(boolean result) {
 
                             //refreshList(Common.rootDIR);
 
                         }
-                    }).execute(Common.METHOD_CREATE_FOLDER,Common.rootDIR);
+                    }).execute(Common.METHOD_CREATE_FOLDER, rootFolder.getPath());
+                } else {
+
+                    refreshList(rootFolder.getPath());
                 }
-                refreshList(Common.rootDIR);
             }
         }).execute(Common.rootDIR);
 
+    }
+
+    public void viewFile(final DropboxItem dropboxItem) {
+
+        ShareTask f = (ShareTask) new ShareTask(MainActivity.this, new ShareTask.AsyncResponse() {
+
+            @Override
+            public void processFinish(String result) {
+
+                if (result != null) {
+
+                    dropboxItem.setShareLink(result);
+                    Intent filePreviewIntent = new Intent(getApplicationContext(), FilePreviewActivity.class);
+                    filePreviewIntent.putExtra("dropboxItem", dropboxItem);
+                    startActivity(filePreviewIntent);
+                }
+            }
+        }).execute(dropboxItem);
+    }
+
+    public void openFolder (DropboxItem dropboxItem) {
+
+        Intent folderNavigatorIntent = new Intent(getApplicationContext(), MainActivity.class);
+        folderNavigatorIntent.putExtra("rootFolder", dropboxItem);
+        startActivity(folderNavigatorIntent);
+    }
+
+    public void viewDropboxItem(final DropboxItem dropboxItem) {
+
+        if (dropboxItem.isDir()) {
+
+            openFolder(dropboxItem);
+        } else {
+
+            viewFile(dropboxItem);
+        }
+    }
+
+    public void beginContextualActionMode(ArrayList <DropboxItem> selectedItems) {
+
+        actionMode = MainActivity.this.startActionMode(new ActionBarCallBack());
+    }
+
+    public void endContextualActionMode() {
+
+        actionMode.finish();
+    }
+
+    public void deleteDropboxItems(ArrayList <DropboxItem> toBeDeleted) {
+
+        deleteFromDropbox(toBeDeleted);
     }
 }

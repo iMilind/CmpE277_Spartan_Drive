@@ -1,86 +1,145 @@
 package com.example.milindmahajan.spartandrive.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.dropbox.client2.DropboxAPI;
+import com.example.milindmahajan.spartandrive.R;
+import com.example.milindmahajan.spartandrive.utils.DateUtil;
+
 /**
  * Created by milind.mahajan on 11/28/15.
  */
-public class DropboxItem {
+public class DropboxItem implements Parcelable {
 
-    String id;
     String name;
     String path;
     String shareLink;
-    boolean isFile;
-    String created;
+    boolean isDir;
     String modified;
 
 
-    public void setId (String id) {
+    public DropboxItem() {
 
-        this.id = id;
     }
 
-    public String getId () {
+    public DropboxItem(DropboxAPI.Entry entry) {
 
-        return this.id;
+        this.setName(entry.fileName());
+        this.setPath(entry.path);
+        this.setShareLink("");
+        this.setDir(entry.isDir);
+        this.setModified(entry.modified);
     }
 
-    public void setName (String name) {
+    public void setName(String name) {
 
         this.name = name;
     }
 
-    public String getName () {
+    public String getName() {
 
         return this.name;
     }
 
-    public void setPath (String path) {
+    public void setPath(String path) {
 
         this.path = path;
     }
 
-    public String getPath () {
+    public String getPath() {
 
         return this.path;
     }
 
-    public void setShareLink (String shareLink) {
+    public void setShareLink(String shareLink) {
 
         this.shareLink = shareLink;
     }
 
-    public String getShareLink () {
+    public String getShareLink() {
 
         return this.shareLink;
     }
 
-    public void setFile (boolean isFile) {
+    public void setDir(boolean isDir) {
 
-        this.isFile = isFile;
+        this.isDir = isDir;
     }
 
-    public boolean isFile () {
+    public boolean isDir() {
 
-        return this.isFile;
+        return this.isDir;
     }
 
-    public void setModified (String modified) {
+    public void setModified(String modified) {
 
         this.modified = modified;
     }
 
-    public String getModified () {
+    public String getModified() {
 
-        return this.modified;
+        return DateUtil.convertDate(this.modified);
     }
 
-    public void setCreated (String created) {
+    public int getIcon() {
 
-        this.created = created;
+        if (!this.isDir()) {
+
+            int dotIndex = this.getPath().lastIndexOf(".");
+            String fileExt = this.getPath().substring(dotIndex, this.getPath().length() - 1);
+
+            if (fileExt.toLowerCase().contains("doc".toLowerCase())) {
+
+                return R.drawable.doc_icon;
+            } else if (fileExt.toLowerCase().contains("xls".toLowerCase())) {
+
+                return R.drawable.xls_icon;
+            } else if (fileExt.toLowerCase().contains("pdf".toLowerCase())) {
+
+                return R.drawable.pdf_icon;
+            } else if (fileExt.toLowerCase().contains("ppt".toLowerCase())) {
+
+                return R.drawable.ppt_icon;
+            } else {
+
+                return R.drawable.def_icon;
+            }
+        }
+
+        return R.drawable.fol_icon;
     }
 
-    public String getCreated () {
+    public int describeContents() {
 
-        return this.created;
+        return 0;
     }
+
+    public void writeToParcel(Parcel parcel, int flags) {
+
+        parcel.writeString(name);
+        parcel.writeString(path);
+        parcel.writeString(shareLink);
+        parcel.writeString(modified);
+    }
+
+    public static final Parcelable.Creator<DropboxItem> CREATOR = new Creator<DropboxItem>() {
+
+        public DropboxItem createFromParcel(Parcel source) {
+
+            DropboxItem dropboxItem = new DropboxItem();
+
+            dropboxItem.setName(source.readString());
+            dropboxItem.setPath(source.readString());
+            dropboxItem.setShareLink(source.readString());
+            dropboxItem.setModified(source.readString());
+
+            return dropboxItem;
+        }
+
+        public DropboxItem[] newArray(int size) {
+
+            return new DropboxItem[size];
+        }
+    };
 }
