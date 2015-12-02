@@ -1,16 +1,25 @@
 package com.example.milindmahajan.spartandrive.activities;
 
+import com.example.milindmahajan.spartandrive.utils.FileTasks;
+
+import android.app.Activity;
+import android.content.Context;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
+
 
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.dropbox.client2.DropboxAPI;
@@ -28,13 +37,28 @@ import com.example.milindmahajan.spartandrive.utils.FileTasks;
 import com.example.milindmahajan.spartandrive.utils.ListFilesTask;
 import com.example.milindmahajan.spartandrive.utils.ShareTask;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements ListViewFragment.ListViewFragmentProtocol {
 
     private ActionMode actionMode;
 
+    private static final int FOLDER_SELECT_ACTIVITY_RESULT_MOVE = 13;
+    private static final int FOLDER_SELECT_ACTIVITY_RESULT_COPY = 14;
+
+    private static final int CONTEXTMENU_OPTION_VIEW = 1;
+    private static final int CONTEXTMENU_OPTION_DELETE = 2;
+    private static final int CONTEXTMENU_OPTION_SHARE = 3;
+    private static final int CONTEXTMENU_OPTION_DOWNLOAD = 4;
+    private static final int CONTEXTMENU_OPTION_MOVE = 5;
+    private static final int CONTEXTMENU_OPTION_COPY = 6;
+    private static final int CONTEXTMENU_OPTION_CANCEL = 7;
+    private boolean mLoggedIn, onResume;
+    private int PICK_IMAGE;
+
     private DropboxItem rootFolder = new DropboxItem();
+    private String selectedFolderPath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
         setContentView(R.layout.activity_main);
 
         if (!ApplicationSettings.getSharedSettings().isAuthenticated()) {
+
 
             AndroidAuthSession session = buildSession();
             Common.setDropboxObj(new DropboxAPI<AndroidAuthSession>(session));
@@ -74,6 +99,30 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
     }
 
     @Override
+    protected void onStart() {
+
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+
+        super.onStop();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle savedInstanceState) {
+
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+
+        super.onConfigurationChanged(newConfig);
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -83,17 +132,99 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
+        int id = item.getItemId();
+        String obj = "";
+        Intent pickIntent = null;
+        switch (id)
+        {
+            case R.id.image:
+                pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                intentPicker("image",pickIntent);
+
+                return true;
+
+            case R.id.video:
+                pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
+                intentPicker("video",pickIntent);
+                return true;
+
+            case R.id.docs:
+     /*           pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Files.getContentUri("external"));
+                intentPicker("files",pickIntent);
+*/
+                showFileChooser();
+                return true;
+
+        }
         return super.onOptionsItemSelected(item);
     }
 
+    public void intentPicker(String obj, Intent pickIntent)
+    {
+
+        String type = obj+"/*";
+
+        Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        getIntent.setType(type);
+
+        Intent chooserIntent = Intent.createChooser(getIntent, "Select " + obj);
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{pickIntent});
+
+        startActivityForResult(chooserIntent, PICK_IMAGE);
+
+    }
+    private void showFileChooser() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("application/pdf");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+        try {
+            startActivityForResult(
+                    Intent.createChooser(intent, "Select txt file"),
+                    PICK_IMAGE);
+        } catch (android.content.ActivityNotFoundException ex) {
+            // Potentially direct the user to the Market with a Dialog
+
+        }
+    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         super.onActivityResult(requestCode, resultCode, data);
+        try
+        {
+            if (requestCode == PICK_IMAGE && resultCode == Activity.RESULT_OK) {
+                if (data == null) {
+                    //Display an error
+                    return;
+                }
+                Context context = MainActivity.this;
+                InputStream inputStream = context.getContentResolver().openInputStream(data.getData());
+                //Now you can do whatever you want with your inpustream, save it as file, upload to a server, decode a bitmap...
+
+                Log.d("intent_result","reached here");
+            }
+            if (requestCode == FOLDER_SELECT_ACTIVITY_RESULT_MOVE && resultCode == MainActivity.RESULT_OK) {
+
+                selectedFolderPath = new String( data.getStringExtra("folderPath"));
+
+                moveDropboxItems(toBeMovedItems, selectedFolderPath);
+            }
+            if (requestCode == FOLDER_SELECT_ACTIVITY_RESULT_COPY && resultCode == MainActivity.RESULT_OK) {
+
+                selectedFolderPath = new String( data.getStringExtra("folderPath"));
+
+                copyDropboxItems(toBeMovedItems, selectedFolderPath);
+            }
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            Log.d("intent_result","reached here");
+        }
+
     }
-
-    private boolean mLoggedIn, onResume;
-
+    
     private AndroidAuthSession buildSession() {
 
         AppKeyPair appKeyPair = new AppKeyPair(Common.APP_KEY, Common.APP_SECRET);
@@ -233,23 +364,20 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 
+            ListViewFragment listViewFragment = (ListViewFragment)getSupportFragmentManager()
+                    .findFragmentById(R.id.list_view_fragment);
+
             switch (item.getItemId()) {
 
                 case R.id.item_delete:
 
-                    ListViewFragment listViewFragment = (ListViewFragment) getSupportFragmentManager()
-                            .findFragmentById(R.id.list_view_fragment);
-
                     deleteFromDropbox(listViewFragment.selectedDropboxItems());
-
                     mode.finish();
                     return true;
 
                 case R.id.item_share:
-                    ListViewFragment listViewFragment1 = (ListViewFragment) getSupportFragmentManager()
-                            .findFragmentById(R.id.list_view_fragment);
-                    shareFromDropbox(listViewFragment1.selectedDropboxItems());
 
+                    shareFromDropbox(listViewFragment.selectedDropboxItems());
                     mode.finish();
                     return true;
 
@@ -260,11 +388,13 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
                 case R.id.item_move:
 
+                    startFolderSelectionIntent(listViewFragment.selectedDropboxItems(), FOLDER_SELECT_ACTIVITY_RESULT_MOVE);
                     mode.finish();
                     return true;
 
                 case R.id.item_copy:
 
+                    startFolderSelectionIntent(listViewFragment.selectedDropboxItems(), FOLDER_SELECT_ACTIVITY_RESULT_COPY);
                     mode.finish();
                     return true;
             }
@@ -351,6 +481,42 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
         }
     }
 
+    private void moveDropboxItems(final ArrayList <DropboxItem> dropboxItems, final String moveToPath) {
+
+        for (DropboxItem item : dropboxItems) {
+
+            FileTasks f = (FileTasks) new FileTasks(MainActivity.this,
+                    new FileTasks.AsyncResponse() {
+
+                        @Override
+                        public void processFinish(boolean result) {
+
+                            if(result) {
+
+                                refreshList(rootFolder.getPath());
+                            }
+                        }
+                    }).execute(Common.METHOD_MOVE, item.getPath(), moveToPath+"/"+item.getName());
+        }
+    }
+
+    private void copyDropboxItems(final ArrayList <DropboxItem> dropboxItems, final String copyToPath) {
+
+        for (DropboxItem item : dropboxItems) {
+
+            FileTasks f = (FileTasks) new FileTasks(MainActivity.this,
+                    new FileTasks.AsyncResponse() {
+
+                        @Override
+                        public void processFinish(boolean result) {
+                            if(result) {
+
+                                refreshList(rootFolder.getPath());
+                            }
+                        }
+                    }).execute(Common.METHOD_COPY, item.getPath(), copyToPath+"/"+item.getName());
+        }
+    }
 
     public void createDIR() throws DropboxException {
 
@@ -427,5 +593,24 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
     public void deleteDropboxItems(ArrayList<DropboxItem> toBeDeleted) {
 
         deleteFromDropbox(toBeDeleted);
+    }
+
+    ArrayList <DropboxItem> toBeMovedItems = new ArrayList<DropboxItem>();
+    public void moveDropboxItem(ArrayList <DropboxItem> toBeMoved) {
+
+        startFolderSelectionIntent(toBeMoved, FOLDER_SELECT_ACTIVITY_RESULT_MOVE);
+    }
+
+    public void copyDropboxItem(ArrayList <DropboxItem> toBeMoved) {
+
+        startFolderSelectionIntent(toBeMoved, FOLDER_SELECT_ACTIVITY_RESULT_COPY);
+    }
+
+    private void startFolderSelectionIntent(ArrayList <DropboxItem> toBeMoved, int intentCode) {
+
+        toBeMovedItems.removeAll(toBeMovedItems);
+        toBeMovedItems.addAll(toBeMoved);
+        Intent folderSelectIntent = new Intent(getApplicationContext(), FolderSelectionActivity.class);
+        startActivityForResult(folderSelectIntent, intentCode);
     }
 }
