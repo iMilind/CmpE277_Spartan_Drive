@@ -73,7 +73,12 @@ public class ShareTask extends AsyncTask<DropboxItem, Void, String> {
 
             dropbox = Common.getDropboxObj();
             DropboxAPI.DropboxLink shareLink = dropbox.share(params[0].getPath());
-            shareAddress = getShareURL(shareLink.url).replaceFirst("https://www", "https://dl");
+            shareAddress = getShareURL(shareLink.url);
+            if (params[0].isDir() == false) {
+
+                shareAddress = shareAddress.replaceFirst("https://www", "https://dl");
+            }
+
             Log.d("XXXXXX", "dropbox share link " + shareAddress);
         } catch (DropboxException e) {
 
