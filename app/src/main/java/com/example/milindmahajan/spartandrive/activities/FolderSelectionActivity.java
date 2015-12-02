@@ -1,21 +1,16 @@
 package com.example.milindmahajan.spartandrive.activities;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
-import android.widget.Checkable;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -43,9 +38,6 @@ public class FolderSelectionActivity extends AppCompatActivity {
         setContentView(R.layout.activity_folder_selection);
 
         addClickListener();
-
-        ListView listView = (ListView)findViewById(R.id.select_folder_list_view);
-        listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
     }
 
     @Override
@@ -86,17 +78,38 @@ public class FolderSelectionActivity extends AppCompatActivity {
 
     private void addClickListener() {
 
-        ListView listView = (ListView)findViewById(R.id.select_folder_list_view);
+        final ListView listView = (ListView)findViewById(R.id.select_folder_list_view);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> av, View v, int pos,
                                     long id) {
 
-                CheckBox checkBox = (CheckBox)v.findViewById(R.id.select_folder_checkBox);
-                checkBox.setChecked(!checkBox.isChecked());
+                deselectPreviousCheckbox();
+                selectCheckbox(v, pos);
             }
         });
+    }
+
+    private void deselectPreviousCheckbox () {
+
+        ListView listView = (ListView) findViewById(R.id.select_folder_list_view);
+        int childCount = listView.getChildCount();
+        for (int i = 0; i < childCount; ++i) {
+
+            View view = listView.getChildAt(i);
+
+            CheckBox checkBox = (CheckBox)view.findViewById(R.id.select_folder_checkBox);
+            checkBox.setChecked(false);
+        }
+    }
+
+    private void selectCheckbox (View view, int position) {
+
+        CheckBox checkBox = (CheckBox)view.findViewById(R.id.select_folder_checkBox);
+        checkBox.setChecked(true);
+
+        selectedPath = dropboxItems.get(position).getPath();
     }
 
     public void didTouchCancelButton (View cancelButton) {
@@ -164,7 +177,7 @@ public class FolderSelectionActivity extends AppCompatActivity {
         listView.setAdapter(listViewAdapter);
     }
 
-    private class ListViewAdapter extends ArrayAdapter<DropboxItem> implements Checkable {
+    private class ListViewAdapter extends ArrayAdapter<DropboxItem> {
 
         public ListViewAdapter(Context context, int resource, int textViewResourceId, List<DropboxItem> objects) {
 
@@ -179,8 +192,7 @@ public class FolderSelectionActivity extends AppCompatActivity {
                 convertView = getLayoutInflater().inflate(R.layout.dropbox_folder_item, parent, false);
             }
 
-            convertView.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), android.R.color.white));
-            final DropboxItem dropboxItem = dropboxItems.get(position);
+            DropboxItem dropboxItem = dropboxItems.get(position);
 
             ImageView imageView = (ImageView)convertView.findViewById(R.id.select_folder_icon);
             imageView.setImageResource(dropboxItem.getIcon());
@@ -191,44 +203,17 @@ public class FolderSelectionActivity extends AppCompatActivity {
             final CheckBox checkBox = (CheckBox)convertView.findViewById(R.id.select_folder_checkBox);
 
             final View finalConvertView = convertView;
-            checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            checkBox.setOnClickListener(new View.OnClickListener() {
 
                 @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                public void onClick(View v) {
 
-                    if(isChecked) {
-
-                        finalConvertView.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), android.R.color.holo_red_light));
-                        selectedPath = dropboxItem.getPath();
-                    } else {
-
-                        finalConvertView.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), android.R.color.white));
-                    }
+                    deselectPreviousCheckbox();
+                    selectCheckbox(finalConvertView, position);
                 }
             });
 
             return convertView;
         }
-
-        private boolean isChecked;
-        private List<Checkable> checkableViews;
-
-        public boolean isChecked() {
-            return isChecked;
-        }
-
-        public void setChecked(boolean isChecked) {
-            this.isChecked = isChecked;
-            for (Checkable c : checkableViews) {
-                c.setChecked(isChecked);
-            }
-        }
-        public void toggle() {
-            this.isChecked = !this.isChecked;
-            for (Checkable c : checkableViews) {
-                c.toggle();
-            }
-        }
-
     }
 }
