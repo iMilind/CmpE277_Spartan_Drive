@@ -20,6 +20,7 @@ import com.dropbox.client2.session.AppKeyPair;
 import com.example.milindmahajan.spartandrive.R;
 import com.example.milindmahajan.spartandrive.fragments.ListViewFragment;
 import com.example.milindmahajan.spartandrive.model.DropboxItem;
+import com.example.milindmahajan.spartandrive.singletons.ApplicationSettings;
 import com.example.milindmahajan.spartandrive.utils.Common;
 import com.example.milindmahajan.spartandrive.utils.FileTasks;
 import com.example.milindmahajan.spartandrive.utils.ListFilesTask;
@@ -32,15 +33,32 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
     private ActionMode actionMode;
 
+    DropboxItem rootFolder = new DropboxItem();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        AndroidAuthSession session = buildSession();
-        Common.setDropboxObj(new DropboxAPI<AndroidAuthSession>(session));
-        Common.getDropboxObj().getSession().startOAuth2Authentication(MainActivity.this);
+        if (!ApplicationSettings.getSharedSettings().isAuthenticated()) {
+
+            AndroidAuthSession session = buildSession();
+            Common.setDropboxObj(new DropboxAPI<AndroidAuthSession>(session));
+            Common.getDropboxObj().getSession().startOAuth2Authentication(MainActivity.this);
+        }
+
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+
+            rootFolder = extras.getParcelable("rootFolder");
+        } else {
+
+            rootFolder.setName("Spartan Drive");
+            rootFolder.setPath(Common.rootDIR);
+        }
+
+        setTitle(rootFolder.getName());
     }
 
     @Override
@@ -105,6 +123,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
                         + e.getLocalizedMessage());
             }
         }
+
         if(mLoggedIn)
         {
             try
@@ -129,6 +148,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
     public void setLoggedIn(boolean loggedIn) {
 
         mLoggedIn = loggedIn;
+        ApplicationSettings.getSharedSettings().setAuthenticated(loggedIn);
         if (loggedIn) {
 
             onResume = false;
@@ -262,7 +282,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
                     if(result) {
 
-                        refreshList("/SpartanDrive");
+                        refreshList(rootFolder.getPath());
                     }
                 }
             }).execute(Common.METHOD_DELETE, item.getPath());
@@ -294,7 +314,6 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
             @Override
             public void processFinish(ArrayList<DropboxAPI.Entry> output) {
 
-
                 // SpartanDrive Folder does not exist.. create it
                 if(output.size()==0) {
 
@@ -306,15 +325,17 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
                             //refreshList(Common.rootDIR);
 
                         }
-                    }).execute(Common.METHOD_CREATE_FOLDER,Common.rootDIR);
+                    }).execute(Common.METHOD_CREATE_FOLDER, rootFolder.getPath());
+                } else {
+
+                    refreshList(rootFolder.getPath());
                 }
-                refreshList(Common.rootDIR);
             }
         }).execute(Common.rootDIR);
 
     }
 
-    public void viewDropboxItem(final DropboxItem dropboxItem) {
+    public void viewFile(final DropboxItem dropboxItem) {
 
         ShareTask f = (ShareTask) new ShareTask(MainActivity.this, new ShareTask.AsyncResponse() {
 
@@ -329,7 +350,25 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
                     startActivity(filePreviewIntent);
                 }
             }
-        }).execute("/SpartanDrive", dropboxItem.getPath());
+        }).execute(rootFolder.getPath(), dropboxItem.getPath());
+    }
+
+    public void openFolder (DropboxItem dropboxItem) {
+
+        Intent folderNavigatorIntent = new Intent(getApplicationContext(), MainActivity.class);
+        folderNavigatorIntent.putExtra("rootFolder", dropboxItem);
+        startActivity(folderNavigatorIntent);
+    }
+
+    public void viewDropboxItem(final DropboxItem dropboxItem) {
+
+        if (dropboxItem.isDir()) {
+
+            openFolder(dropboxItem);
+        } else {
+
+            viewFile(dropboxItem);
+        }
     }
 
     public void beginContextualActionMode(ArrayList <DropboxItem> selectedItems) {

@@ -284,9 +284,6 @@ public class ListViewFragment extends Fragment {
             TextView title = (TextView)convertView.findViewById(R.id.title);
             title.setText(dropboxItem.getName());
 
-            TextView description = (TextView)convertView.findViewById(R.id.description);
-            description.setText(dropboxItem.getDescription());
-
             TextView modified = (TextView)convertView.findViewById(R.id.modified);
             modified.setText(dropboxItem.getModified());
 

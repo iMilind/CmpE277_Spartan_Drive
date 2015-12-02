@@ -15,9 +15,8 @@ public class DropboxItem implements Parcelable {
     String name;
     String path;
     String shareLink;
-    boolean isFile;
+    boolean isDir;
     String modified;
-    String description;
 
 
     public DropboxItem() {
@@ -29,9 +28,8 @@ public class DropboxItem implements Parcelable {
         this.setName(entry.fileName());
         this.setPath(entry.path);
         this.setShareLink("");
-        this.setFile(entry.isDir);
+        this.setDir(entry.isDir);
         this.setModified(entry.modified);
-        this.setDescription("Description of the Dropbox item");
     }
 
     public void setName(String name) {
@@ -64,14 +62,14 @@ public class DropboxItem implements Parcelable {
         return this.shareLink;
     }
 
-    public void setFile(boolean isFile) {
+    public void setDir(boolean isDir) {
 
-        this.isFile = isFile;
+        this.isDir = isDir;
     }
 
-    public boolean isFile() {
+    public boolean isDir() {
 
-        return this.isFile;
+        return this.isDir;
     }
 
     public void setModified(String modified) {
@@ -84,38 +82,32 @@ public class DropboxItem implements Parcelable {
         return DateUtil.convertDate(this.modified);
     }
 
-
-    public void setDescription(String description) {
-
-        this.description = description;
-    }
-
-    public String getDescription() {
-
-        return this.description;
-    }
-
     public int getIcon() {
 
-        int dotIndex = this.getPath().lastIndexOf(".");
-        String fileExt = this.getPath().substring(dotIndex, this.getPath().length() - 1);
+        if (!this.isDir()) {
 
-        if (fileExt.toLowerCase().contains("doc".toLowerCase())) {
+            int dotIndex = this.getPath().lastIndexOf(".");
+            String fileExt = this.getPath().substring(dotIndex, this.getPath().length() - 1);
 
-            return R.drawable.doc_icon;
-        } else if (fileExt.toLowerCase().contains("xls".toLowerCase())) {
+            if (fileExt.toLowerCase().contains("doc".toLowerCase())) {
 
-            return R.drawable.xls_icon;
-        } else if (fileExt.toLowerCase().contains("pdf".toLowerCase())) {
+                return R.drawable.doc_icon;
+            } else if (fileExt.toLowerCase().contains("xls".toLowerCase())) {
 
-            return R.drawable.pdf_icon;
-        } else if (fileExt.toLowerCase().contains("ppt".toLowerCase())) {
+                return R.drawable.xls_icon;
+            } else if (fileExt.toLowerCase().contains("pdf".toLowerCase())) {
 
-            return R.drawable.ppt_icon;
-        } else {
+                return R.drawable.pdf_icon;
+            } else if (fileExt.toLowerCase().contains("ppt".toLowerCase())) {
 
-            return R.drawable.def_icon;
+                return R.drawable.ppt_icon;
+            } else {
+
+                return R.drawable.def_icon;
+            }
         }
+
+        return R.drawable.fol_icon;
     }
 
     public int describeContents() {
@@ -129,7 +121,6 @@ public class DropboxItem implements Parcelable {
         parcel.writeString(path);
         parcel.writeString(shareLink);
         parcel.writeString(modified);
-        parcel.writeString(description);
     }
 
     public static final Parcelable.Creator<DropboxItem> CREATOR = new Creator<DropboxItem>() {
@@ -142,7 +133,6 @@ public class DropboxItem implements Parcelable {
             dropboxItem.setPath(source.readString());
             dropboxItem.setShareLink(source.readString());
             dropboxItem.setModified(source.readString());
-            dropboxItem.setDescription(source.readString());
 
             return dropboxItem;
         }
