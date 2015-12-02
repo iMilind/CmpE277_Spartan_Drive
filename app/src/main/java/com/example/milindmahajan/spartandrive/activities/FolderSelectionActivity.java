@@ -17,8 +17,12 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.dropbox.client2.DropboxAPI;
 import com.example.milindmahajan.spartandrive.R;
+import com.example.milindmahajan.spartandrive.fragments.ListViewFragment;
 import com.example.milindmahajan.spartandrive.model.DropboxItem;
+import com.example.milindmahajan.spartandrive.utils.Common;
+import com.example.milindmahajan.spartandrive.utils.ListFilesTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +50,7 @@ public class FolderSelectionActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
 
+        refreshList(Common.rootDIR);
         super.onStart();
     }
 
@@ -72,7 +77,6 @@ public class FolderSelectionActivity extends AppCompatActivity {
 
     }
 
-
     private void addClickListener() {
 
         ListView listView = (ListView)findViewById(R.id.list_view);
@@ -92,6 +96,45 @@ public class FolderSelectionActivity extends AppCompatActivity {
 
     public void didTouchSelectButton (View cancelButton) {
 
+    }
+
+    public void refreshList(String path) {
+
+        ListFilesTask listFilesTask = (ListFilesTask) new ListFilesTask(new ListFilesTask.AsyncResponse() {
+
+            @Override
+            public void processFinish(ArrayList<DropboxAPI.Entry> output) {
+
+                ArrayList<DropboxItem> result = new ArrayList<DropboxItem>();
+
+                for(DropboxAPI.Entry e : output) {
+
+                    DropboxItem dropboxItem = new DropboxItem(e);
+                    result.add(dropboxItem);
+                }
+                
+                ListViewFragment listViewFragment = (ListViewFragment)getSupportFragmentManager()
+                        .findFragmentById(R.id.list_view_fragment);
+                listViewFragment.reloadListView(result);
+            }
+        }).execute(path);
+    }
+
+    public void reloadListView (ArrayList<DropboxItem> dropboxItems) {
+
+        this.dropboxItems.removeAll(this.dropboxItems);
+        this.dropboxItems.addAll(dropboxItems);
+
+        reloadData(this.dropboxItems);
+    }
+
+    private void reloadData(ArrayList <DropboxItem> dropboxItems) {
+
+        listViewAdapter = new ListViewAdapter(getApplicationContext(),
+                R.layout.dropbox_item, 0, this.dropboxItems);
+
+        ListView listView = (ListView)findViewById(R.id.list_view);
+        listView.setAdapter(listViewAdapter);
     }
 
     private class ListViewAdapter extends ArrayAdapter<DropboxItem> {
