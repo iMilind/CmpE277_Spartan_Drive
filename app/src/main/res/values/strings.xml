@@ -8,4 +8,7 @@
     <string name="dropbox_list">List</string>
     <string name="title_activity_main_ui">MainUIActivity</string>
     <string name="title_activity_file_preview">File Preview</string>
+    <string name="title_activity_folder_selection">FolderSelectionActivity</string>
+    <string name="folder_select_cancel">Cancel</string>
+    <string name="folder_select_select">Select</string>
 </resources>
