@@ -95,7 +95,9 @@ public class DropboxItem implements Parcelable {
             } else if (fileExt.toLowerCase().contains("xls".toLowerCase())) {
 
                 return R.drawable.xls_icon;
-            } else if (fileExt.toLowerCase().contains("pdf".toLowerCase())) {
+            }else if(fileExt.toLowerCase().contains("htm".toLowerCase())){
+                return R.drawable.html;
+            }else if (fileExt.toLowerCase().contains("pdf".toLowerCase())) {
 
                 return R.drawable.pdf_icon;
             } else if (fileExt.toLowerCase().contains("ppt".toLowerCase())) {

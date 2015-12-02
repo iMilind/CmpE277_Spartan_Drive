@@ -1,10 +1,11 @@
 package com.example.milindmahajan.spartandrive.activities;
 
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Parcelable;
+
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ActionMode;
@@ -15,6 +16,7 @@ import android.widget.Toast;
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.android.AndroidAuthSession;
 import com.dropbox.client2.exception.DropboxException;
+
 import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
 import com.example.milindmahajan.spartandrive.R;
@@ -25,7 +27,6 @@ import com.example.milindmahajan.spartandrive.utils.Common;
 import com.example.milindmahajan.spartandrive.utils.FileTasks;
 import com.example.milindmahajan.spartandrive.utils.ListFilesTask;
 import com.example.milindmahajan.spartandrive.utils.ShareTask;
-
 
 import java.util.ArrayList;
 
@@ -102,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
             AccessTokenPair accessToken = new AccessTokenPair(stored[0],
                     stored[1]);
-            session = new AndroidAuthSession(appKeyPair,accessToken);
+            session = new AndroidAuthSession(appKeyPair, accessToken);
         } else {
 
             session = new AndroidAuthSession(appKeyPair);
@@ -135,13 +136,10 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
             }
         }
 
-        if(mLoggedIn)
-        {
-            try
-            {
+        if (mLoggedIn) {
+            try {
                 createDIR();
-            }
-            catch (DropboxException e) {
+            } catch (DropboxException e) {
 
                 Log.i("DbAuthLog", "Error creating SpartanDrive Folder..", e);
                 showToast("Error creating SpartanDrive Folder..Please contact Administrator");
@@ -167,8 +165,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
     }
 
-    public void refreshList(String path)
-    {
+    public void refreshList(String path) {
         ListFilesTask t = (ListFilesTask) new ListFilesTask(new ListFilesTask.AsyncResponse() {
 
             @Override
@@ -176,16 +173,17 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
                 ArrayList<DropboxItem> result = new ArrayList<DropboxItem>();
 
 
-                for(DropboxAPI.Entry e : output) {
+                for (DropboxAPI.Entry e : output) {
 
                     DropboxItem dropboxItem = new DropboxItem(e);
                     result.add(dropboxItem);
                 }
-                ListViewFragment listViewFragment = (ListViewFragment)getSupportFragmentManager()
+                ListViewFragment listViewFragment = (ListViewFragment) getSupportFragmentManager()
                         .findFragmentById(R.id.list_view_fragment);
                 listViewFragment.reloadListView(result);
             }
         }).execute(path);
+
     }
 
     private void storeKeys(String key, String secret) {
@@ -239,7 +237,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
                 case R.id.item_delete:
 
-                    ListViewFragment listViewFragment = (ListViewFragment)getSupportFragmentManager()
+                    ListViewFragment listViewFragment = (ListViewFragment) getSupportFragmentManager()
                             .findFragmentById(R.id.list_view_fragment);
 
                     deleteFromDropbox(listViewFragment.selectedDropboxItems());
@@ -248,7 +246,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
                     return true;
 
                 case R.id.item_share:
-                    ListViewFragment listViewFragment1 = (ListViewFragment)getSupportFragmentManager()
+                    ListViewFragment listViewFragment1 = (ListViewFragment) getSupportFragmentManager()
                             .findFragmentById(R.id.list_view_fragment);
                     shareFromDropbox(listViewFragment1.selectedDropboxItems());
 
@@ -294,28 +292,28 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
         }
     }
 
-    private void deleteFromDropbox(final ArrayList <DropboxItem> dropboxItems) {
+    private void deleteFromDropbox(final ArrayList<DropboxItem> dropboxItems) {
 
         for (DropboxItem item : dropboxItems) {
 
             FileTasks f = (FileTasks) new FileTasks(MainActivity.this,
                     new FileTasks.AsyncResponse() {
 
-                @Override
-                public void processFinish(boolean result) {
+                        @Override
+                        public void processFinish(boolean result) {
 
-                    if(result) {
+                            if (result) {
 
-                            refreshList(rootFolder.getPath());
-                    }
-                }
-            }).execute(Common.METHOD_DELETE, item.getPath());
+                                refreshList(rootFolder.getPath());
+                            }
+                        }
+                    }).execute(Common.METHOD_DELETE, item.getPath());
         }
     }
 
     public void shareFromDropbox(final ArrayList<DropboxItem> dropboxItems) {
 
-        final ArrayList <String> shareUrls = new ArrayList<String>();
+        final ArrayList<String> shareUrls = new ArrayList<String>();
         for (DropboxItem item : dropboxItems) {
 
             ShareTask f = (ShareTask) new ShareTask(MainActivity.this, new ShareTask.AsyncResponse() {
@@ -330,9 +328,9 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
                         if (shareUrls.size() == dropboxItems.size()) {
 
                             StringBuilder builder = new StringBuilder();
-                            for(int i = 0; i < shareUrls.size(); i++) {
+                            for (int i = 0; i < shareUrls.size(); i++) {
 
-                                if (i < shareUrls.size()-1) {
+                                if (i < shareUrls.size() - 1) {
 
                                     builder.append(shareUrls.get(i)).append(", ");
                                 } else {
@@ -340,8 +338,8 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
                                     builder.append(shareUrls.get(i));
                                 }
                             }
-
-                            Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:deepakrkole@gmail.com?subject=" +
+//Sharing with email ids
+                            Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto: ?subject=" +
                                     Uri.encode("File shared from SpartaDrive") + "&body=" +
                                     Uri.encode(builder.toString())));
                             startActivity(intent);
@@ -349,9 +347,9 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
                     }
                 }
             }).execute(item);
+
         }
     }
-
 
 
     public void createDIR() throws DropboxException {
@@ -362,9 +360,9 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
             public void processFinish(ArrayList<DropboxAPI.Entry> output) {
 
                 // SpartanDrive Folder does not exist.. create it
-                if(output.size()==0) {
+                if (output.size() == 0) {
 
-                    FileTasks f = (FileTasks)new FileTasks(MainActivity.this, new FileTasks.AsyncResponse() {
+                    FileTasks f = (FileTasks) new FileTasks(MainActivity.this, new FileTasks.AsyncResponse() {
 
                         @Override
                         public void processFinish(boolean result) {
@@ -400,7 +398,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
         }).execute(dropboxItem);
     }
 
-    public void openFolder (DropboxItem dropboxItem) {
+    public void openFolder(DropboxItem dropboxItem) {
 
         Intent folderNavigatorIntent = new Intent(getApplicationContext(), MainActivity.class);
         folderNavigatorIntent.putExtra("rootFolder", dropboxItem);
@@ -410,15 +408,13 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
     public void viewDropboxItem(final DropboxItem dropboxItem) {
 
         if (dropboxItem.isDir()) {
-
             openFolder(dropboxItem);
         } else {
-
             viewFile(dropboxItem);
         }
     }
 
-    public void beginContextualActionMode(ArrayList <DropboxItem> selectedItems) {
+    public void beginContextualActionMode(ArrayList<DropboxItem> selectedItems) {
 
         actionMode = MainActivity.this.startActionMode(new ActionBarCallBack());
     }
@@ -428,7 +424,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
         actionMode.finish();
     }
 
-    public void deleteDropboxItems(ArrayList <DropboxItem> toBeDeleted) {
+    public void deleteDropboxItems(ArrayList<DropboxItem> toBeDeleted) {
 
         deleteFromDropbox(toBeDeleted);
     }
