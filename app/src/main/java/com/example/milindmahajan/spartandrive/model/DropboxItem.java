@@ -18,6 +18,7 @@ public class DropboxItem implements Parcelable {
     String isDir;
     String modified;
     String parentPath;
+    String size;
 
 
     public DropboxItem() {
@@ -32,6 +33,7 @@ public class DropboxItem implements Parcelable {
         this.setDir(entry.isDir);
         this.setModified(entry.modified);
         this.setParentPath(entry.parentPath());
+        this.setSize(entry.size);
     }
 
     public void setName(String name) {
@@ -94,6 +96,16 @@ public class DropboxItem implements Parcelable {
         this.parentPath = parentPath;
     }
 
+    public void setSize(String size) {
+
+        this.size = size;
+    }
+
+    public String getSize() {
+
+        return this.size;
+    }
+
     public int getIcon() {
 
         if (!this.isDir()) {
@@ -135,6 +147,7 @@ public class DropboxItem implements Parcelable {
         parcel.writeString(modified);
         parcel.writeString(parentPath);
         parcel.writeString(isDir);
+        parcel.writeString(size);
     }
 
     public static final Parcelable.Creator<DropboxItem> CREATOR = new Creator<DropboxItem>() {
@@ -149,6 +162,7 @@ public class DropboxItem implements Parcelable {
             dropboxItem.setModified(source.readString());
             dropboxItem.setParentPath(source.readString());
             dropboxItem.setDir(Boolean.valueOf(source.readString()));
+            dropboxItem.setSize(source.readString());
 
             return dropboxItem;
         }

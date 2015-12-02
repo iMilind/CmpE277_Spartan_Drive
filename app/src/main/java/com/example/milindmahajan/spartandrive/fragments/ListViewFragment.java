@@ -296,6 +296,10 @@ public class ListViewFragment extends Fragment {
             TextView modified = (TextView)convertView.findViewById(R.id.modified);
             modified.setText(dropboxItem.getModified());
 
+            TextView size = (TextView)convertView.findViewById(R.id.size);
+            size.setText(dropboxItem.getSize());
+            size.setVisibility(dropboxItem.isDir() ? View.INVISIBLE : View.VISIBLE);
+
             final CheckBox checkBox = (CheckBox)convertView.findViewById(R.id.checkBox);
             checkBox.setChecked(listViewAdapter.isSelected(dropboxItems.get(position)));
 
