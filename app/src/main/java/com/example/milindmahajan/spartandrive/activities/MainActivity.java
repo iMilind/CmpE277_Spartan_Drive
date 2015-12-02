@@ -1,9 +1,11 @@
 package com.example.milindmahajan.spartandrive.activities;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ActionMode;
@@ -31,6 +33,7 @@ import com.example.milindmahajan.spartandrive.utils.Common;
 import com.example.milindmahajan.spartandrive.utils.FileTasks;
 import com.example.milindmahajan.spartandrive.utils.ListFilesTask;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,6 +50,8 @@ public class MainActivity extends AppCompatActivity {
     private static final int CONTEXTMENU_OPTION_MOVE = 5;
     private static final int CONTEXTMENU_OPTION_COPY = 6;
     private static final int CONTEXTMENU_OPTION_CANCEL = 7;
+    private boolean mLoggedIn, onResume;
+    private int PICK_IMAGE;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,9 +59,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        AndroidAuthSession session = buildSession();
-        Common.setDropboxObj(new DropboxAPI<AndroidAuthSession>(session));
-        Common.getDropboxObj().getSession().startOAuth2Authentication(MainActivity.this);
+        if(!mLoggedIn)
+        {
+            AndroidAuthSession session = buildSession();
+            Common.setDropboxObj(new DropboxAPI<AndroidAuthSession>(session));
+            Common.getDropboxObj().getSession().startOAuth2Authentication(MainActivity.this);
+        }
 
         ListView listView = (ListView)findViewById(R.id.list_view);
         registerForContextMenu(listView);
@@ -140,13 +148,85 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
+        int id = item.getItemId();
+        String obj = "";
+        Intent pickIntent = null;
+        switch (id)
+        {
+            case R.id.image:
+                pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                intentPicker("image",pickIntent);
+
+                return true;
+
+            case R.id.video:
+                pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
+                intentPicker("video",pickIntent);
+                return true;
+
+            case R.id.docs:
+     /*           pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Files.getContentUri("external"));
+                intentPicker("files",pickIntent);
+*/
+                showFileChooser();
+                return true;
+
+        }
         return super.onOptionsItemSelected(item);
     }
 
+    public void intentPicker(String obj, Intent pickIntent)
+    {
+
+        String type = obj+"/*";
+
+        Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        getIntent.setType(type);
+
+        Intent chooserIntent = Intent.createChooser(getIntent, "Select " + obj);
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{pickIntent});
+
+        startActivityForResult(chooserIntent, PICK_IMAGE);
+
+    }
+    private void showFileChooser() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("application/pdf");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+        try {
+            startActivityForResult(
+                    Intent.createChooser(intent, "Select txt file"),
+                    PICK_IMAGE);
+        } catch (android.content.ActivityNotFoundException ex) {
+            // Potentially direct the user to the Market with a Dialog
+
+        }
+    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         super.onActivityResult(requestCode, resultCode, data);
+        try
+        {
+            if (requestCode == PICK_IMAGE && resultCode == Activity.RESULT_OK) {
+                if (data == null) {
+                    //Display an error
+                    return;
+                }
+                Context context = MainActivity.this;
+                InputStream inputStream = context.getContentResolver().openInputStream(data.getData());
+                //Now you can do whatever you want with your inpustream, save it as file, upload to a server, decode a bitmap...
+
+                Log.d("intent_result","reached here");
+            }
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            Log.d("intent_result","reached here");
+        }
+
     }
 
 
@@ -165,7 +245,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private boolean mLoggedIn, onResume;
+
 
     private AndroidAuthSession buildSession() {
 
