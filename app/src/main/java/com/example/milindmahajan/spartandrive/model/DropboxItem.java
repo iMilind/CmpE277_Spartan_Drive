@@ -140,31 +140,57 @@ public class DropboxItem implements Parcelable, Comparator<DropboxItem> {
             if (!this.isDir()) {
 
                 int dotIndex = this.getPath().lastIndexOf(".");
-                String fileExt = this.getPath().substring(dotIndex, this.getPath().length() - 1);
+                String fileExt = this.getPath().substring(dotIndex, this.getPath().length());
 
-                if (fileExt.toLowerCase().contains("doc".toLowerCase())) {
+                if (fileExt.toLowerCase().contains("doc".toLowerCase())
+                        || fileExt.toLowerCase().contains("txt".toLowerCase())
+                        || fileExt.toLowerCase().contains("rtf".toLowerCase())) {
 
-                    return R.drawable.doc_icon;
+                    return R.drawable.doc;
                 } else if (fileExt.toLowerCase().contains("xls".toLowerCase())) {
 
-                    return R.drawable.xls_icon;
+                    return R.drawable.xls;
                 } else if (fileExt.toLowerCase().contains("pdf".toLowerCase())) {
 
-                    return R.drawable.pdf_icon;
+                    return R.drawable.pdf;
                 } else if (fileExt.toLowerCase().contains("ppt".toLowerCase())) {
 
-                    return R.drawable.ppt_icon;
+                    return R.drawable.ppt;
+                } else if (fileExt.toLowerCase().contains("png".toLowerCase())
+                        || fileExt.toLowerCase().contains("jpg".toLowerCase())
+                        || fileExt.toLowerCase().contains("jpeg".toLowerCase())) {
+
+                    return R.drawable.image;
+                } else if (fileExt.toLowerCase().contains("htm".toLowerCase())) {
+
+                    return R.drawable.html;
+                } else if (fileExt.toLowerCase().contains("xml".toLowerCase())) {
+
+                    return R.drawable.xml;
+                } else if (fileExt.toLowerCase().contains("mp3".toLowerCase())
+                        || fileExt.toLowerCase().contains("wav".toLowerCase())) {
+
+                    return R.drawable.mp3;
+                } else if (fileExt.toLowerCase().contains("avi".toLowerCase())
+                        || fileExt.toLowerCase().contains("flv".toLowerCase())
+                        || fileExt.toLowerCase().contains("mp4".toLowerCase())
+                        || fileExt.toLowerCase().contains("mkv".toLowerCase())
+                        || fileExt.toLowerCase().contains("wmv".toLowerCase())
+                        || fileExt.toLowerCase().contains("3gp".toLowerCase())) {
+
+                    return R.drawable.mp4;
                 } else {
 
-                    return R.drawable.def_icon;
+                    return R.drawable.folder;
                 }
+            } else {
+
+                return R.drawable.fol_icon;
             }
         } catch (Exception exc) {
 
             return R.drawable.fol_icon;
         }
-
-        return R.drawable.fol_icon;
     }
 
     public int describeContents() {
