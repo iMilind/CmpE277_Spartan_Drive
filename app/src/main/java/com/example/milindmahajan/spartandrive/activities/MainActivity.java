@@ -21,6 +21,7 @@ import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.dropbox.client2.DropboxAPI;
@@ -30,8 +31,10 @@ import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
 import com.example.milindmahajan.spartandrive.R;
 import com.example.milindmahajan.spartandrive.fragments.ListViewFragment;
+import com.example.milindmahajan.spartandrive.model.AccountInfo;
 import com.example.milindmahajan.spartandrive.model.DropboxItem;
 import com.example.milindmahajan.spartandrive.singletons.ApplicationSettings;
+import com.example.milindmahajan.spartandrive.utils.AccountInfoTask;
 import com.example.milindmahajan.spartandrive.utils.Common;
 import com.example.milindmahajan.spartandrive.utils.FileTasks;
 import com.example.milindmahajan.spartandrive.utils.ListFilesTask;
@@ -166,6 +169,10 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
                 case R.id.item_create_folder:
                     openAlertDialogueForCreateFolder();
+                    return true;
+
+                case R.id.action_acc_info:
+                    getAcctInfo();
                     return true;
             }
 
@@ -572,6 +579,20 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
         }
     }
 
+    public void getAcctInfo(){
+
+        AccountInfoTask accountInfoTask = (AccountInfoTask) new AccountInfoTask(MainActivity.this, new AccountInfoTask.AsyncResponse() {
+
+            @Override
+            public void processFinish(AccountInfo accountInfo) {
+
+                acctInfoDialogBox(accountInfo);
+
+            }
+        }).execute();
+
+    }
+
     public void shareFromDropbox(final ArrayList<DropboxItem> dropboxItems) {
 
         final ArrayList <String> shareUrls = new ArrayList<String>();
@@ -600,15 +621,141 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
                                 }
                             }
 
-                            Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:deepakrkole@gmail.com?subject=" +
-                                    Uri.encode("File shared from SpartaDrive") + "&body=" +
-                                    Uri.encode(builder.toString())));
-                            startActivity(intent);
+                            sendEmailDialogBox(builder);
                         }
                     }
                 }
             }).execute(item);
         }
+    }
+
+    private void sendEmailDialogBox(final StringBuilder stringBuilder) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Share with");
+
+        final EditText emailInput = new EditText(this);
+        emailInput.setHint("Use comma to separate multiple emails");
+
+        emailInput.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(emailInput);
+
+        builder.setPositiveButton("Share", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(emailInput.getWindowToken(), 0);
+
+                MainActivity.this.openEmailIntent(stringBuilder, emailInput.getText().toString());
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(emailInput.getWindowToken(), 0);
+
+                dialog.cancel();
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        Button negativeButton = dialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+        negativeButton.setTextColor(Color.parseColor("#F44336"));
+
+        Button positiveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        positiveButton.setTextColor(Color.parseColor("#2196F3"));
+
+        emailInput.requestFocus();
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+    }
+
+    private void openEmailIntent (StringBuilder stringBuilder, String toEmail) {
+
+        Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"+toEmail+"?subject=" +
+                Uri.encode("File shared from SpartaDrive") + "&body=" +
+                Uri.encode(stringBuilder.toString())));
+        startActivity(intent);
+    }
+
+
+    private void acctInfoDialogBox(final AccountInfo accountInfo){
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Account Info");
+
+        final EditText acctName = new EditText(this);
+        final EditText email = new EditText(this);
+        final EditText quota = new EditText(this);
+        final EditText quotaNormal = new EditText(this);
+        final EditText sharedQuota = new EditText(this);
+        final EditText freeSpace = new EditText(this);
+
+        Context context = getApplicationContext();
+        LinearLayout layout = new LinearLayout(context);
+        layout.setOrientation(LinearLayout.VERTICAL);
+
+        acctName.setText(accountInfo.getDisplayName());
+        acctName.setBackgroundResource(android.R.color.transparent);
+        acctName.setFocusable(false);
+        acctName.setInputType(InputType.TYPE_CLASS_TEXT);
+        acctName.setTextColor(Color.parseColor("#2196F3"));
+        layout.addView(acctName);
+
+        email.setText(accountInfo.getEmail());
+        email.setBackgroundResource(android.R.color.transparent);
+        email.setFocusable(false);
+        email.setInputType(InputType.TYPE_CLASS_TEXT);
+        email.setTextColor(Color.parseColor("#2196F3"));
+        layout.addView(email);
+
+        quota.setText("Total space: " + accountInfo.getQuota() + " MB");
+        quota.setBackgroundResource(android.R.color.transparent);
+        quota.setFocusable(false);
+        quota.setInputType(InputType.TYPE_CLASS_TEXT);
+        quota.setTextColor(Color.parseColor("#5AC5A7"));
+        layout.addView(quota);
+
+        quotaNormal.setText("Used space: " + accountInfo.getQuotaNormal() + " MB");
+        quotaNormal.setBackgroundResource(android.R.color.transparent);
+        quotaNormal.setFocusable(false);
+        quotaNormal.setInputType(InputType.TYPE_CLASS_TEXT);
+        quotaNormal.setTextColor(Color.parseColor("#5AC5A7"));
+        layout.addView(quotaNormal);
+
+        sharedQuota.setText("Shared space: " + accountInfo.getQuotaShared() + " MB");
+        sharedQuota.setBackgroundResource(android.R.color.transparent);
+        sharedQuota.setFocusable(false);
+        sharedQuota.setInputType(InputType.TYPE_CLASS_TEXT);
+        sharedQuota.setTextColor(Color.parseColor("#5AC5A7"));
+        layout.addView(sharedQuota);
+
+        freeSpace.setText("Available space: " + accountInfo.getFreeSpace() + " MB");
+        freeSpace.setBackgroundResource(android.R.color.transparent);
+        freeSpace.setFocusable(false);
+        freeSpace.setInputType(InputType.TYPE_CLASS_TEXT);
+        freeSpace.setTextColor(Color.parseColor("#F44336"));
+        layout.addView(freeSpace);
+
+        builder.setView(layout);
+
+        builder.setPositiveButton("Dismiss", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+
+        builder.show();
     }
 
     private void moveDropboxItems(final ArrayList <DropboxItem> dropboxItems, final String moveToPath) {
