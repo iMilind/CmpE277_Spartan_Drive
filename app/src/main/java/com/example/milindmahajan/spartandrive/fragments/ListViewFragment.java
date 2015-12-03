@@ -43,7 +43,8 @@ public class ListViewFragment extends Fragment {
     private static final int CONTEXTMENU_OPTION_DOWNLOAD = 4;
     private static final int CONTEXTMENU_OPTION_MOVE = 5;
     private static final int CONTEXTMENU_OPTION_COPY = 6;
-    private static final int CONTEXTMENU_OPTION_CANCEL = 7;
+    private static final int CONTEXTMENU_OPTION_RENAME = 7;
+    private static final int CONTEXTMENU_OPTION_CANCEL = 8;
 
     ListViewFragmentProtocol listViewFragmentListener;
     public interface  ListViewFragmentProtocol {
@@ -55,6 +56,8 @@ public class ListViewFragment extends Fragment {
 
         public void moveDropboxItem(ArrayList <DropboxItem> toBeMoved);
         public void copyDropboxItem(ArrayList <DropboxItem> toBeMoved);
+
+        public void renameDropboxItem(DropboxItem item);
 
         public void beginContextualActionMode(ArrayList <DropboxItem> selectedItems);
         public void endContextualActionMode();
@@ -140,7 +143,11 @@ public class ListViewFragment extends Fragment {
         menu.add(Menu.NONE, CONTEXTMENU_OPTION_DOWNLOAD, 3, "Download");
         menu.add(Menu.NONE, CONTEXTMENU_OPTION_MOVE, 4, "Move");
         menu.add(Menu.NONE, CONTEXTMENU_OPTION_COPY, 5, "Copy");
-        menu.add(Menu.NONE, CONTEXTMENU_OPTION_CANCEL, 6, "Cancel");
+        if (!this.dropboxItems.get(contextMenuInfo.position).isDir()) {
+
+            menu.add(Menu.NONE, CONTEXTMENU_OPTION_RENAME, 6, "Rename");
+        }
+        menu.add(Menu.NONE, CONTEXTMENU_OPTION_CANCEL, 7, "Cancel");
     }
 
     @Override
@@ -185,6 +192,11 @@ public class ListViewFragment extends Fragment {
                 ArrayList <DropboxItem> itemsToCopy = new ArrayList<DropboxItem>();
                 itemsToCopy.add(this.dropboxItems.get(contextMenuInfo.position));
                 listViewFragmentListener.copyDropboxItem(itemsToCopy);
+                break;
+
+            case CONTEXTMENU_OPTION_RENAME:
+
+                listViewFragmentListener.renameDropboxItem(this.dropboxItems.get(contextMenuInfo.position));
                 break;
 
             case CONTEXTMENU_OPTION_CANCEL:

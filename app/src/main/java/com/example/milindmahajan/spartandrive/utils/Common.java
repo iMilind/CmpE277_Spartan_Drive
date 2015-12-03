@@ -31,6 +31,7 @@ public class Common
     final static public String METHOD_DELETE = "DELETE";
     final static public String METHOD_CREATE_FOLDER = "CREATE_FOLDER";
     final static public String METHOD_UPLOAD = "UPLOAD";
+    final static public String METHOD_RENAME = "RENAME";
 
     public static final String rootDIR = "/SpartanDrive";
 

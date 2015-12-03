@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -84,6 +85,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
             rootFolder = extras.getParcelable("rootFolder");
         } else {
 
+            rootFolder.setDir(true);
             rootFolder.setName("Spartan Drive");
             rootFolder.setPath(Common.rootDIR);
         }
@@ -95,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
             rootFolder = new DropboxItem();
 
+            rootFolder.setDir(true);
             rootFolder.setName("Spartan Drive");
             rootFolder.setPath(Common.rootDIR);
 
@@ -164,12 +167,12 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
             }
         } else if (item.getItemId() == R.id.item_create_folder) {
 
-            openAlertDialogue();
+            openAlertDialogueForCreateFolder();
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void openAlertDialogue () {
+    private void openAlertDialogueForCreateFolder () {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Folder name");
@@ -185,6 +188,9 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(folderNameInput.getWindowToken(), 0);
+
                 MainActivity.this.createFolderWithName(folderNameInput.getText().toString());
             }
         });
@@ -193,6 +199,9 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
+
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(folderNameInput.getWindowToken(), 0);
 
                 dialog.cancel();
             }
@@ -206,6 +215,10 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
         Button positiveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
         positiveButton.setTextColor(Color.parseColor("#2196F3"));
+
+        folderNameInput.requestFocus();
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
     }
 
     private void createFolderWithName(String folderName) {
@@ -687,6 +700,85 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
     public void copyDropboxItem(ArrayList <DropboxItem> toBeMoved) {
 
         startFolderSelectionIntent(toBeMoved, FOLDER_SELECT_ACTIVITY_RESULT_COPY);
+    }
+
+    DropboxItem selectedItem = new DropboxItem();
+    public void renameDropboxItem(DropboxItem item) {
+
+        selectedItem = item;
+        openAlertDialogueRenameFile();
+    }
+
+    private void openAlertDialogueRenameFile () {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("New title");
+        builder.setMessage(selectedItem.getName()+" will be renamed");
+
+        final EditText fileNameInput = new EditText(this);
+
+        fileNameInput.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(fileNameInput);
+
+        builder.setPositiveButton("Rename", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(fileNameInput.getWindowToken(), 0);
+
+                MainActivity.this.rename(fileNameInput.getText().toString());
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(fileNameInput.getWindowToken(), 0);
+
+                dialog.cancel();
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        Button negativeButton = dialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+        negativeButton.setTextColor(Color.parseColor("#F44336"));
+
+        Button positiveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        positiveButton.setTextColor(Color.parseColor("#2196F3"));
+
+        fileNameInput.requestFocus();
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+    }
+
+    private void rename(String newName) {
+
+        if (newName.trim().length() != 0) {
+
+            FileTasks f = (FileTasks) new FileTasks(MainActivity.this,
+                    new FileTasks.AsyncResponse() {
+
+                        @Override
+                        public void processFinish(boolean result) {
+
+                            if(result) {
+
+                                refreshList(rootFolder.getPath());
+                            }
+                        }
+                    }).execute(Common.METHOD_RENAME, selectedItem.getPath(),
+                    selectedItem.getParentPath()+File.separator+newName+"."+selectedItem.getExtension());
+        } else {
+
+            showToast("Enter a valid name for file!");
+        }
     }
 
     private void startFolderSelectionIntent(ArrayList <DropboxItem> toBeMoved, int intentCode) {

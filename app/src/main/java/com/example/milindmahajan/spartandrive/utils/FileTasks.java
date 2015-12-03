@@ -70,6 +70,12 @@ public class FileTasks extends AsyncTask<String, Void, Boolean>
                     dropbox.createFolder(params[1]);
                     return true;
 
+                case Common.METHOD_RENAME:
+                    Log.d("FileOperation", "Moving File: " + params[1]);
+                    message = "renamed";
+                    dropbox.move(params[1], params[2]);
+                    return true;
+
                 case Common.METHOD_UPLOAD:
                     final File tempDir = context.getCacheDir();
                     File tempFile;
