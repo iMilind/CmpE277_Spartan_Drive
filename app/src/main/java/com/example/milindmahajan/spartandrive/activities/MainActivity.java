@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -172,7 +173,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Folder name");
-        builder.setMessage("This folder will be created under "+rootFolder.getName());
+        builder.setMessage("This folder will be created under " + rootFolder.getName());
 
         final EditText folderNameInput = new EditText(this);
 
@@ -187,6 +188,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
                 MainActivity.this.createFolderWithName(folderNameInput.getText().toString());
             }
         });
+
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 
             @Override
@@ -196,7 +198,14 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
             }
         });
 
-        builder.show();
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        Button negativeButton = dialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+        negativeButton.setTextColor(Color.parseColor("#F44336"));
+
+        Button positiveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        positiveButton.setTextColor(Color.parseColor("#2196F3"));
     }
 
     private void createFolderWithName(String folderName) {
