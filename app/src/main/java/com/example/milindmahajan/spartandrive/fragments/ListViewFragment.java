@@ -219,10 +219,7 @@ public class ListViewFragment extends Fragment{
         menu.add(Menu.NONE, CONTEXTMENU_OPTION_DOWNLOAD, 3, "Download");
         menu.add(Menu.NONE, CONTEXTMENU_OPTION_MOVE, 4, "Move");
         menu.add(Menu.NONE, CONTEXTMENU_OPTION_COPY, 5, "Copy");
-        if (!this.dropboxItems.get(contextMenuInfo.position).isDir()) {
-
-            menu.add(Menu.NONE, CONTEXTMENU_OPTION_RENAME, 6, "Rename");
-        }
+        menu.add(Menu.NONE, CONTEXTMENU_OPTION_RENAME, 6, "Rename");
         menu.add(Menu.NONE, CONTEXTMENU_OPTION_CANCEL, 7, "Cancel");
     }
 
@@ -361,6 +358,11 @@ public class ListViewFragment extends Fragment{
     public ArrayList <DropboxItem> selectedDropboxItems () {
 
         return listViewAdapter.selectedFiles;
+    }
+
+    public ArrayList <DropboxItem> dropboxItems() {
+
+        return this.dropboxItems;
     }
 
     private class ListViewAdapter extends ArrayAdapter<DropboxItem> {

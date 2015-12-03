@@ -54,13 +54,6 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
     private static final int FOLDER_SELECT_ACTIVITY_RESULT_COPY = 14;
     public static final int CANNOT_BE_MOVED = 15;
 
-    private static final int CONTEXTMENU_OPTION_VIEW = 1;
-    private static final int CONTEXTMENU_OPTION_DELETE = 2;
-    private static final int CONTEXTMENU_OPTION_SHARE = 3;
-    private static final int CONTEXTMENU_OPTION_DOWNLOAD = 4;
-    private static final int CONTEXTMENU_OPTION_MOVE = 5;
-    private static final int CONTEXTMENU_OPTION_COPY = 6;
-    private static final int CONTEXTMENU_OPTION_CANCEL = 7;
     private boolean mLoggedIn, onResume;
     private int PICK_IMAGE = 0;
     private int PICK_PDF = 1;
@@ -75,10 +68,8 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#5AC5A7")));
-//        actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#1565C0")));
 
         if (!ApplicationSettings.getSharedSettings().isAuthenticated()) {
-
 
             AndroidAuthSession session = buildSession();
             Common.setDropboxObj(new DropboxAPI<AndroidAuthSession>(session));
@@ -109,6 +100,14 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
             setTitle(rootFolder.getName());
         }
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+
+        super.onWindowFocusChanged(hasFocus);
+
+        System.out.println("onWindowFocusChanged");
     }
 
     @Override
@@ -149,7 +148,6 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
         String obj = "";
         Intent pickIntent = null;
 
-
             switch (id)
             {
                 case R.id.image:
@@ -175,10 +173,6 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
                     getAcctInfo();
                     return true;
             }
-
-
-
-
 
         return super.onOptionsItemSelected(item);
     }
@@ -323,7 +317,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
         InputStream inputStream = getContentResolver().openInputStream(data.getData());
         int size = inputStream.available();
-        String fileName = getFileName(data,requestCode);
+        String fileName = getFileName(data, requestCode);
         Log.i("TEST", "File Size: " + inputStream.available());
 
         UploadTask u = new UploadTask(MainActivity.this, fileName, inputStream, size);
@@ -822,6 +816,16 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
                     if (!listViewFragment.isSearchModeOn()) {
 
                         refreshList(rootFolder.getPath());
+                    } else {
+
+                        ArrayList temp = listViewFragment.dropboxItems();
+                        if (temp.size() == 0) {
+
+                            refreshList(rootFolder.getPath());
+                        } else {
+
+                            listViewFragment.reloadListView(temp);
+                        }
                     }
                 }
             }
@@ -949,6 +953,21 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
     private void rename(String newName) {
 
+        String name = null;
+
+        if (!selectedItem.isDir()) {
+
+            name = selectedItem
+                    .getParentPath()
+                    +newName
+                    +"."+selectedItem.getExtension();
+        } else {
+
+            name = selectedItem
+                    .getParentPath()
+                    +newName;
+        }
+
         if (newName.trim().length() != 0) {
 
             FileTasks f = (FileTasks) new FileTasks(MainActivity.this,
@@ -962,8 +981,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
                                 refreshList(rootFolder.getPath());
                             }
                         }
-                    }).execute(Common.METHOD_RENAME, selectedItem.getPath(),
-                    selectedItem.getParentPath()+File.separator+newName+"."+selectedItem.getExtension());
+                    }).execute(Common.METHOD_RENAME, selectedItem.getPath(), name);
         } else {
 
             showToast("Enter a valid name for file!");
