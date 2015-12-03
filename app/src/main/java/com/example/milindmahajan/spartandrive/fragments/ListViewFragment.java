@@ -2,6 +2,7 @@ package com.example.milindmahajan.spartandrive.fragments;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -292,6 +293,7 @@ public class ListViewFragment extends Fragment {
 
             TextView title = (TextView)convertView.findViewById(R.id.title);
             title.setText(dropboxItem.getName());
+            title.setTextColor(Color.parseColor("#424242"));
 
             TextView modified = (TextView)convertView.findViewById(R.id.modified);
             modified.setText(dropboxItem.getModified());

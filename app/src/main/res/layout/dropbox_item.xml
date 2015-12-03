@@ -36,7 +36,6 @@
         android:layout_marginLeft="10dp"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:textColor="@android:color/holo_blue_dark"
         />
 
     <TextView android:id="@+id/modified"

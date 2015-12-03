@@ -2,16 +2,23 @@ package com.example.milindmahajan.spartandrive.activities;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.InputType;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.dropbox.client2.DropboxAPI;
@@ -28,6 +35,7 @@ import com.example.milindmahajan.spartandrive.utils.FileTasks;
 import com.example.milindmahajan.spartandrive.utils.ListFilesTask;
 import com.example.milindmahajan.spartandrive.utils.ShareTask;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 
@@ -57,6 +65,9 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#2196F3")));
 
         if (!ApplicationSettings.getSharedSettings().isAuthenticated()) {
 
@@ -127,28 +138,81 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
         int id = item.getItemId();
         String obj = "";
         Intent pickIntent = null;
-        switch (id)
-        {
-            case R.id.image:
-                pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                intentPicker("image",pickIntent);
+        if (item.getItemId() == R.id.item_upload) {
 
-                return true;
+            switch (id)
+            {
+                case R.id.image:
+                    pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    intentPicker("image",pickIntent);
 
-            case R.id.video:
-                pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
-                intentPicker("video",pickIntent);
-                return true;
+                    return true;
 
-            case R.id.docs:
+                case R.id.video:
+                    pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
+                    intentPicker("video",pickIntent);
+                    return true;
+
+                case R.id.docs:
      /*           pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Files.getContentUri("external"));
                 intentPicker("files",pickIntent);
 */
-                showFileChooser();
-                return true;
+                    showFileChooser();
+                    return true;
 
+            }
+        } else if (item.getItemId() == R.id.item_create_folder) {
+
+            openAlertDialogue();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void openAlertDialogue () {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Folder name");
+        builder.setMessage("This folder will be created under "+rootFolder.getName());
+
+        final EditText folderNameInput = new EditText(this);
+
+        folderNameInput.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(folderNameInput);
+
+        builder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                MainActivity.this.createFolderWithName(folderNameInput.getText().toString());
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
+    }
+
+    private void createFolderWithName(String folderName) {
+
+        FileTasks f = (FileTasks) new FileTasks(MainActivity.this,
+                new FileTasks.AsyncResponse() {
+
+                    @Override
+                    public void processFinish(boolean result) {
+
+                        if(result) {
+
+                            refreshList(rootFolder.getPath());
+                        }
+                    }
+                }).execute(Common.METHOD_CREATE_FOLDER, rootFolder.getPath()+ File.separator+folderName);
     }
 
     public void intentPicker(String obj, Intent pickIntent)

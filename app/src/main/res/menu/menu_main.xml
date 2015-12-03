@@ -6,7 +6,7 @@
 
     <item
         android:id="@+id/item_upload"
-        android:icon="@android:drawable/ic_menu_upload"
+        android:icon="@drawable/upload_file"
         app:showAsAction="always"
         android:titleCondensed="Upload"
         android:title="Upload">
@@ -30,5 +30,13 @@
         </menu>
     </item>
 
+    <item
+        android:id="@+id/item_create_folder"
+        android:icon="@drawable/create_folder_icon"
+        app:showAsAction="always"
+        android:titleCondensed="Upload"
+        android:title="Upload">
+
+    </item>
 
 </menu>
