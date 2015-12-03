@@ -7,10 +7,12 @@ import com.dropbox.client2.DropboxAPI;
 import com.example.milindmahajan.spartandrive.R;
 import com.example.milindmahajan.spartandrive.utils.DateUtil;
 
+import java.util.Comparator;
+
 /**
  * Created by milind.mahajan on 11/28/15.
  */
-public class DropboxItem implements Parcelable {
+public class DropboxItem implements Parcelable, Comparator<DropboxItem> {
 
     String name;
     String path;
@@ -172,4 +174,10 @@ public class DropboxItem implements Parcelable {
             return new DropboxItem[size];
         }
     };
+
+    @Override
+    public int compare(DropboxItem lhs, DropboxItem rhs) {
+
+        return lhs.getName().compareTo(rhs.getName());
+    }
 }

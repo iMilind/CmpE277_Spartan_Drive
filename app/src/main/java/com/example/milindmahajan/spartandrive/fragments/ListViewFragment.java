@@ -25,6 +25,7 @@ import com.example.milindmahajan.spartandrive.R;
 import com.example.milindmahajan.spartandrive.model.DropboxItem;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -208,10 +209,53 @@ public class ListViewFragment extends Fragment {
         });
     }
 
+    private ArrayList<DropboxItem> sortDropboxItems(ArrayList <DropboxItem> unsortedArray) {
+
+        ArrayList <DropboxItem> sortedItems = new ArrayList<DropboxItem>();
+
+        sortedItems.addAll(getSortedFolders(unsortedArray));
+        sortedItems.addAll(getSortedFiles(unsortedArray));
+
+        return sortedItems;
+    }
+
+    private ArrayList<DropboxItem> getSortedFolders(ArrayList <DropboxItem> unsortedArray) {
+
+        ArrayList <DropboxItem> folders = new ArrayList<DropboxItem>();
+
+        for (DropboxItem item : unsortedArray) {
+
+            if (item.isDir()) {
+
+                folders.add(item);
+            }
+        }
+
+        Collections.sort(folders, new DropboxItem());
+        return folders;
+    }
+
+    private ArrayList<DropboxItem> getSortedFiles(ArrayList <DropboxItem> unsortedArray) {
+
+        ArrayList <DropboxItem> files = new ArrayList<DropboxItem>();
+
+        for (DropboxItem item : unsortedArray) {
+
+            if (!item.isDir()) {
+
+                files.add(item);
+            }
+        }
+
+        Collections.sort(files, new DropboxItem());
+        return files;
+    }
+
     public void reloadListView (ArrayList<DropboxItem> dropboxItems) {
 
+        ArrayList sortedItems = sortDropboxItems(dropboxItems);
         this.dropboxItems.removeAll(this.dropboxItems);
-        this.dropboxItems.addAll(dropboxItems);
+        this.dropboxItems.addAll(sortedItems);
 
         reloadData(this.dropboxItems);
     }
