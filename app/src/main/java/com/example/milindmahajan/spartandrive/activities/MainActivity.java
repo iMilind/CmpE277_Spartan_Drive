@@ -71,7 +71,8 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
         setContentView(R.layout.activity_main);
 
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#2196F3")));
+        actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#5AC5A7")));
+//        actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#1565C0")));
 
         if (!ApplicationSettings.getSharedSettings().isAuthenticated()) {
 
@@ -320,7 +321,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
         UploadTask u = new UploadTask(MainActivity.this, fileName, inputStream, size);
         u.execute();
-        Log.d("intent_result","reached here");
+        Log.d("intent_result", "reached here");
     }
 
     private String getFileName(Intent data, int requestCode)

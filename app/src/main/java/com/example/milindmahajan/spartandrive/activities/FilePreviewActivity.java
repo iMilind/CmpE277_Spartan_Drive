@@ -25,7 +25,8 @@ public class FilePreviewActivity extends AppCompatActivity {
         setContentView(R.layout.activity_file_preview);
 
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#2196F3")));
+        actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#5AC5A7")));
+//        actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#1565C0")));
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {

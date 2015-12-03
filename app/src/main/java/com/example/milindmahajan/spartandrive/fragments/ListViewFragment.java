@@ -130,8 +130,7 @@ public class ListViewFragment extends Fragment{
                 hideSoftKeyboard(getActivity(), parentView);
                 String searchQuery = searchEditText.getText().toString();
 
-                if(searchQuery.length()>0)
-                {
+                if (searchQuery.length() > 0) {
 
                     searchMode = Boolean.TRUE;
                     SearchTask s = (SearchTask) new SearchTask(new SearchTask.AsyncResponse() {
@@ -141,7 +140,7 @@ public class ListViewFragment extends Fragment{
                             ArrayList<DropboxItem> result = new ArrayList<DropboxItem>();
 
                             Log.d("search results", "reached here");
-                            for(DropboxAPI.Entry e : output) {
+                            for (DropboxAPI.Entry e : output) {
 
                                 DropboxItem dropboxItem = new DropboxItem(e);
                                 result.add(dropboxItem);
@@ -149,10 +148,8 @@ public class ListViewFragment extends Fragment{
 
                             reloadListView(result);
                         }
-                    },listViewFragmentListener.getRootFolder().getPath(),searchQuery).execute();
-                }
-                else
-                {
+                    }, listViewFragmentListener.getRootFolder().getPath(), searchQuery).execute();
+                } else {
                     searchMode = Boolean.FALSE;
                     listViewFragmentListener.refreshRootFolder();
                 }
@@ -427,14 +424,15 @@ public class ListViewFragment extends Fragment{
 
             TextView title = (TextView)convertView.findViewById(R.id.title);
             title.setText(dropboxItem.getName());
-            title.setTextColor(Color.parseColor("#424242"));
+            title.setTextColor(Color.parseColor("#FF652F"));
+//            title.setTextColor(Color.parseColor("#424242"));
 
             TextView itemInfoToggle = (TextView)convertView.findViewById(R.id.modified);
+            itemInfoToggle.setTextColor(Color.parseColor("#666666"));
             if(searchMode)
             {
-                itemInfoToggle.setText("in ..."+dropboxItem.getParentPath());
+                itemInfoToggle.setText("in ..." + dropboxItem.getParentPath());
                 itemInfoToggle.setTypeface(null, Typeface.ITALIC);
-                itemInfoToggle.setTextColor(Color.parseColor("#A0DDFD"));
             }
             else
             {
@@ -444,6 +442,7 @@ public class ListViewFragment extends Fragment{
 
             TextView size = (TextView)convertView.findViewById(R.id.size);
             size.setText(dropboxItem.getSize());
+            size.setTextColor(Color.parseColor("#666666"));
             size.setVisibility(dropboxItem.isDir() ? View.INVISIBLE : View.VISIBLE);
 
             final CheckBox checkBox = (CheckBox)convertView.findViewById(R.id.checkBox);
