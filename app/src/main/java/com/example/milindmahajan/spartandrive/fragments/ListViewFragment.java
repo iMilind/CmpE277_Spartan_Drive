@@ -110,9 +110,10 @@ public class ListViewFragment extends Fragment{
         return parentView;
     }
 
+    public boolean isSearchModeOn () {
 
-
-
+        return searchMode;
+    }
     public static void hideSoftKeyboard (Activity activity, View view) {
 
         InputMethodManager imm = (InputMethodManager)activity.getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -425,7 +426,6 @@ public class ListViewFragment extends Fragment{
             TextView title = (TextView)convertView.findViewById(R.id.title);
             title.setText(dropboxItem.getName());
             title.setTextColor(Color.parseColor("#FF652F"));
-//            title.setTextColor(Color.parseColor("#424242"));
 
             TextView itemInfoToggle = (TextView)convertView.findViewById(R.id.modified);
             itemInfoToggle.setTextColor(Color.parseColor("#666666"));
@@ -443,7 +443,13 @@ public class ListViewFragment extends Fragment{
             TextView size = (TextView)convertView.findViewById(R.id.size);
             size.setText(dropboxItem.getSize());
             size.setTextColor(Color.parseColor("#666666"));
-            size.setVisibility(dropboxItem.isDir() ? View.INVISIBLE : View.VISIBLE);
+            if(searchMode) {
+
+                size.setVisibility(View.INVISIBLE);
+            } else {
+
+                size.setVisibility(dropboxItem.isDir() ? View.INVISIBLE : View.VISIBLE);
+            }
 
             final CheckBox checkBox = (CheckBox)convertView.findViewById(R.id.checkBox);
             checkBox.setChecked(listViewAdapter.isSelected(dropboxItems.get(position)));

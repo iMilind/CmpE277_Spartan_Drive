@@ -817,7 +817,12 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
                     }).execute(Common.METHOD_CREATE_FOLDER, rootFolder.getPath());
                 } else {
 
-                    refreshList(rootFolder.getPath());
+                    ListViewFragment listViewFragment = (ListViewFragment) getSupportFragmentManager().
+                            findFragmentById(R.id.list_view_fragment);
+                    if (!listViewFragment.isSearchModeOn()) {
+
+                        refreshList(rootFolder.getPath());
+                    }
                 }
             }
         }).execute(Common.rootDIR);
