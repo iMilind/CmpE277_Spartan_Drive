@@ -1,8 +1,6 @@
 # CmpE277_Spartan_Drive
 
-This app enables one to upload, manage, and share files among friends.
-
-Integration of Google Drive API
+Integration of DropboxSDK API for android
 
 The major features include:
 
