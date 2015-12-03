@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -31,8 +32,12 @@ import com.example.milindmahajan.spartandrive.utils.Common;
 import com.example.milindmahajan.spartandrive.utils.FileTasks;
 import com.example.milindmahajan.spartandrive.utils.ListFilesTask;
 import com.example.milindmahajan.spartandrive.utils.ShareTask;
+import com.example.milindmahajan.spartandrive.utils.UploadTask;
 
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
@@ -49,8 +54,8 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
     private static final int CONTEXTMENU_OPTION_COPY = 6;
     private static final int CONTEXTMENU_OPTION_CANCEL = 7;
     private boolean mLoggedIn, onResume;
-    private int PICK_IMAGE;
-
+    private int PICK_IMAGE = 0;
+    private int PICK_PDF = 1;
     private DropboxItem rootFolder = new DropboxItem();
 
 
@@ -119,9 +124,6 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
                 return true;
 
             case R.id.docs:
-     /*           pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Files.getContentUri("external"));
-                intentPicker("files",pickIntent);
-*/
                 showFileChooser();
                 return true;
 
@@ -131,9 +133,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
     public void intentPicker(String obj, Intent pickIntent)
     {
-
         String type = obj+"/*";
-
         Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
         getIntent.setType(type);
 
@@ -147,32 +147,26 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("application/pdf");
         intent.addCategory(Intent.CATEGORY_OPENABLE);
+        startActivityForResult(intent, PICK_PDF);
 
-        try {
-            startActivityForResult(
-                    Intent.createChooser(intent, "Select txt file"),
-                    PICK_IMAGE);
-        } catch (android.content.ActivityNotFoundException ex) {
-            // Potentially direct the user to the Market with a Dialog
-
-        }
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         super.onActivityResult(requestCode, resultCode, data);
         try
         {
-            if (requestCode == PICK_IMAGE && resultCode == Activity.RESULT_OK) {
+            if ((requestCode == PICK_IMAGE || requestCode == PICK_PDF) && resultCode == Activity.RESULT_OK) {
                 if (data == null) {
                     //Display an error
                     return;
                 }
-                Context context = MainActivity.this;
-                InputStream inputStream = context.getContentResolver().openInputStream(data.getData());
-                //Now you can do whatever you want with your inpustream, save it as file, upload to a server, decode a bitmap...
+                else
+                {
+                    uploadFile(data, requestCode);
+                }
 
-                Log.d("intent_result","reached here");
             }
         }
         catch(Exception e)
@@ -182,7 +176,47 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
         }
 
     }
-    
+
+    private void uploadFile(Intent data, int requestCode) throws IOException {
+
+        InputStream inputStream = getContentResolver().openInputStream(data.getData());
+        int size = inputStream.available();
+        String fileName = getFileName(data,requestCode);
+        Log.i("TEST", "File Size: " + inputStream.available());
+
+        UploadTask u = new UploadTask(MainActivity.this, fileName, inputStream, size);
+        u.execute();
+        Log.d("intent_result","reached here");
+    }
+
+    private String getFileName(Intent data, int requestCode)
+    {
+
+        String path = data.getData().getPath();
+        String[] pathArr = null;
+        String fileName = "";
+        String baseName = "";
+        String type = getContentResolver().getType(data.getData());
+
+        if(requestCode == 0)
+        {
+            pathArr = path.split(File.separator);
+
+        }
+        else if(requestCode == 1)
+        {
+            pathArr = path.split("=");
+        }
+        fileName = pathArr[pathArr.length-1];
+        pathArr = type.split(File.separator);
+        baseName = pathArr[0];
+        type = pathArr[1];
+
+        fileName = baseName + "_" + fileName + "." + type;
+        fileName = rootFolder.getPath() + File.separator + fileName;
+
+        return  fileName;
+    }
     private AndroidAuthSession buildSession() {
 
         AppKeyPair appKeyPair = new AppKeyPair(Common.APP_KEY, Common.APP_SECRET);
@@ -391,15 +425,15 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
             FileTasks f = (FileTasks) new FileTasks(MainActivity.this,
                     new FileTasks.AsyncResponse() {
 
-                @Override
-                public void processFinish(boolean result) {
+                        @Override
+                        public void processFinish(boolean result) {
 
-                    if(result) {
+                            if(result) {
 
-                            refreshList(rootFolder.getPath());
-                    }
-                }
-            }).execute(Common.METHOD_DELETE, item.getPath());
+                                refreshList(rootFolder.getPath());
+                            }
+                        }
+                    }).execute(Common.METHOD_DELETE, item.getPath());
         }
     }
 

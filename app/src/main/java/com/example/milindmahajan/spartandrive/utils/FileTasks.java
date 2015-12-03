@@ -69,22 +69,6 @@ public class FileTasks extends AsyncTask<String, Void, Boolean>
                     message = "created";
                     dropbox.createFolder(params[1]);
                     return true;
-
-                case Common.METHOD_UPLOAD:
-                    final File tempDir = context.getCacheDir();
-                    File tempFile;
-                    FileWriter fr;
-
-                    tempFile = File.createTempFile("file", ".txt", tempDir);
-                    fr = new FileWriter(tempFile);
-                    fr.write("Sample text file created for demo purpose. You may use some other file format for your app ");
-                    fr.close();
-
-                    FileInputStream fileInputStream = new FileInputStream(tempFile);
-                    dropbox.putFile("/textfile.txt", fileInputStream,
-                            tempFile.length(), null, null);
-
-                    tempFile.delete();
             }
         } catch (DropboxException e) {
 
@@ -92,13 +76,6 @@ public class FileTasks extends AsyncTask<String, Void, Boolean>
             e.printStackTrace();
             message = e.getCause().getMessage();
         }
-        catch (IOException e) {
-
-            Log.i("File IO Operation", "Exception: ", e);
-            e.printStackTrace();
-            message = e.getCause().getMessage();
-        }
-
         return false;
     }
 
@@ -108,7 +85,7 @@ public class FileTasks extends AsyncTask<String, Void, Boolean>
 
         if (result) {
 
-            Toast.makeText(context, "File " + message + " sucesfully!",
+            Toast.makeText(context, "File " + message + " successfully!",
                     Toast.LENGTH_LONG).show();
         } else {
 
