@@ -17,5 +17,6 @@
     <string name="title_activity_folder_selection">Select Folder</string>
     <string name="folder_select_cancel">Cancel</string>
     <string name="folder_select_select">Select</string>
+    <string name="search_hint">Search Files or Folders</string>
 
 </resources>

@@ -43,10 +43,7 @@ public class ListFilesTask extends AsyncTask<String, Void, ArrayList<DropboxAPI.
         try {
 
             DropboxAPI.Entry dir = dropbox.metadata(params[0], 1000, null, true, null);
-            for (DropboxAPI.Entry entry : dir.contents) {
-
-                fileList.add(entry);
-            }
+            fileList.addAll(dir.contents);
 
         } catch (DropboxException e) {
 

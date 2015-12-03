@@ -1,28 +1,39 @@
 package com.example.milindmahajan.spartandrive.fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.ContextMenu;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.dropbox.client2.DropboxAPI;
 import com.example.milindmahajan.spartandrive.R;
 import com.example.milindmahajan.spartandrive.model.DropboxItem;
+import com.example.milindmahajan.spartandrive.utils.Common;
+import com.example.milindmahajan.spartandrive.utils.SearchTask;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,15 +42,19 @@ import java.util.List;
 /**
  * Created by milind.mahajan on 11/30/15.
  */
-public class ListViewFragment extends Fragment {
+public class ListViewFragment extends Fragment{
 
     private View parentView;
     ArrayList <DropboxItem> dropboxItems = new ArrayList<DropboxItem>();
     private ListViewAdapter listViewAdapter;
 
+    private EditText searchField;
     private static final int CONTEXTMENU_OPTION_VIEW = 1;
     private static final int CONTEXTMENU_OPTION_DELETE = 2;
     private static final int CONTEXTMENU_OPTION_SHARE = 3;
+    private static boolean searchMode;
+
+
     private static final int CONTEXTMENU_OPTION_DOWNLOAD = 4;
     private static final int CONTEXTMENU_OPTION_MOVE = 5;
     private static final int CONTEXTMENU_OPTION_COPY = 6;
@@ -61,6 +76,9 @@ public class ListViewFragment extends Fragment {
 
         public void beginContextualActionMode(ArrayList <DropboxItem> selectedItems);
         public void endContextualActionMode();
+
+        public DropboxItem getRootFolder();
+        public void refreshRootFolder();
     }
 
     @Override
@@ -85,11 +103,71 @@ public class ListViewFragment extends Fragment {
         ListView listView = (ListView)parentView.findViewById(R.id.list_view);
         registerForContextMenu(listView);
 
+        searchField = (EditText) parentView.findViewById(R.id.searchField);
+        addTextChangeListener();
         addClickListener();
 
         return parentView;
     }
 
+
+
+
+    public static void hideSoftKeyboard (Activity activity, View view) {
+
+        InputMethodManager imm = (InputMethodManager)activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
+    }
+
+    private void addTextChangeListener() {
+
+        final EditText searchEditText = (EditText) parentView.findViewById(R.id.searchField);
+
+        searchEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+
+                hideSoftKeyboard(getActivity(), parentView);
+                String searchQuery = searchEditText.getText().toString();
+
+                if(searchQuery.length()>0)
+                {
+
+                    searchMode = Boolean.TRUE;
+                    SearchTask s = (SearchTask) new SearchTask(new SearchTask.AsyncResponse() {
+                        @Override
+                        public void processFinish(ArrayList<DropboxAPI.Entry> output) {
+
+                            ArrayList<DropboxItem> result = new ArrayList<DropboxItem>();
+
+                            Log.d("search results", "reached here");
+                            for(DropboxAPI.Entry e : output) {
+
+                                DropboxItem dropboxItem = new DropboxItem(e);
+                                result.add(dropboxItem);
+                            }
+
+                            reloadListView(result);
+                        }
+                    },listViewFragmentListener.getRootFolder().getPath(),searchQuery).execute();
+                }
+                else
+                {
+                    searchMode = Boolean.FALSE;
+                    listViewFragmentListener.refreshRootFolder();
+                }
+                if (actionId == EditorInfo.IME_ACTION_SEND ||
+                        actionId == EditorInfo.IME_ACTION_GO ||
+                        actionId == EditorInfo.IME_ACTION_DONE) {
+
+                    hideSoftKeyboard(getActivity(), parentView);
+
+                    return true;
+                }
+                return false;
+            }
+        });
+    }
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
 
@@ -351,8 +429,18 @@ public class ListViewFragment extends Fragment {
             title.setText(dropboxItem.getName());
             title.setTextColor(Color.parseColor("#424242"));
 
-            TextView modified = (TextView)convertView.findViewById(R.id.modified);
-            modified.setText(dropboxItem.getModified());
+            TextView itemInfoToggle = (TextView)convertView.findViewById(R.id.modified);
+            if(searchMode)
+            {
+                itemInfoToggle.setText("in ..."+dropboxItem.getParentPath());
+                itemInfoToggle.setTypeface(null, Typeface.ITALIC);
+                itemInfoToggle.setTextColor(Color.parseColor("#A0DDFD"));
+            }
+            else
+            {
+                itemInfoToggle.setText(dropboxItem.getModified());
+                itemInfoToggle.setTypeface(null, Typeface.NORMAL);
+            }
 
             TextView size = (TextView)convertView.findViewById(R.id.size);
             size.setText(dropboxItem.getSize());

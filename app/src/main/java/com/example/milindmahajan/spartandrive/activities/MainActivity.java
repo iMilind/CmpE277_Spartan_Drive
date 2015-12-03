@@ -446,6 +446,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
         }).execute(path);
     }
 
+
     private void storeKeys(String key, String secret) {
 
         SharedPreferences prefs = getSharedPreferences(Common.ACCOUNT_PREFS_NAME, 0);
@@ -823,5 +824,15 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
         Intent folderSelectIntent = new Intent(getApplicationContext(), FolderSelectionActivity.class);
         folderSelectIntent.putExtra("parentFolder", toBeMoved.get(0));
         startActivityForResult(folderSelectIntent, intentCode);
+    }
+
+    @Override
+    public DropboxItem getRootFolder() {
+        return rootFolder;
+    }
+
+    @Override
+    public void refreshRootFolder() {
+        refreshList(rootFolder.getPath());
     }
 }
