@@ -25,6 +25,7 @@ import com.example.milindmahajan.spartandrive.R;
 import com.example.milindmahajan.spartandrive.model.DropboxItem;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -42,7 +43,8 @@ public class ListViewFragment extends Fragment {
     private static final int CONTEXTMENU_OPTION_DOWNLOAD = 4;
     private static final int CONTEXTMENU_OPTION_MOVE = 5;
     private static final int CONTEXTMENU_OPTION_COPY = 6;
-    private static final int CONTEXTMENU_OPTION_CANCEL = 7;
+    private static final int CONTEXTMENU_OPTION_RENAME = 7;
+    private static final int CONTEXTMENU_OPTION_CANCEL = 8;
 
     ListViewFragmentProtocol listViewFragmentListener;
     public interface  ListViewFragmentProtocol {
@@ -54,6 +56,8 @@ public class ListViewFragment extends Fragment {
 
         public void moveDropboxItem(ArrayList <DropboxItem> toBeMoved);
         public void copyDropboxItem(ArrayList <DropboxItem> toBeMoved);
+
+        public void renameDropboxItem(DropboxItem item);
 
         public void beginContextualActionMode(ArrayList <DropboxItem> selectedItems);
         public void endContextualActionMode();
@@ -139,7 +143,11 @@ public class ListViewFragment extends Fragment {
         menu.add(Menu.NONE, CONTEXTMENU_OPTION_DOWNLOAD, 3, "Download");
         menu.add(Menu.NONE, CONTEXTMENU_OPTION_MOVE, 4, "Move");
         menu.add(Menu.NONE, CONTEXTMENU_OPTION_COPY, 5, "Copy");
-        menu.add(Menu.NONE, CONTEXTMENU_OPTION_CANCEL, 6, "Cancel");
+        if (!this.dropboxItems.get(contextMenuInfo.position).isDir()) {
+
+            menu.add(Menu.NONE, CONTEXTMENU_OPTION_RENAME, 6, "Rename");
+        }
+        menu.add(Menu.NONE, CONTEXTMENU_OPTION_CANCEL, 7, "Cancel");
     }
 
     @Override
@@ -186,6 +194,11 @@ public class ListViewFragment extends Fragment {
                 listViewFragmentListener.copyDropboxItem(itemsToCopy);
                 break;
 
+            case CONTEXTMENU_OPTION_RENAME:
+
+                listViewFragmentListener.renameDropboxItem(this.dropboxItems.get(contextMenuInfo.position));
+                break;
+
             case CONTEXTMENU_OPTION_CANCEL:
 
                 break;
@@ -208,10 +221,53 @@ public class ListViewFragment extends Fragment {
         });
     }
 
+    private ArrayList<DropboxItem> sortDropboxItems(ArrayList <DropboxItem> unsortedArray) {
+
+        ArrayList <DropboxItem> sortedItems = new ArrayList<DropboxItem>();
+
+        sortedItems.addAll(getSortedFolders(unsortedArray));
+        sortedItems.addAll(getSortedFiles(unsortedArray));
+
+        return sortedItems;
+    }
+
+    private ArrayList<DropboxItem> getSortedFolders(ArrayList <DropboxItem> unsortedArray) {
+
+        ArrayList <DropboxItem> folders = new ArrayList<DropboxItem>();
+
+        for (DropboxItem item : unsortedArray) {
+
+            if (item.isDir()) {
+
+                folders.add(item);
+            }
+        }
+
+        Collections.sort(folders, new DropboxItem());
+        return folders;
+    }
+
+    private ArrayList<DropboxItem> getSortedFiles(ArrayList <DropboxItem> unsortedArray) {
+
+        ArrayList <DropboxItem> files = new ArrayList<DropboxItem>();
+
+        for (DropboxItem item : unsortedArray) {
+
+            if (!item.isDir()) {
+
+                files.add(item);
+            }
+        }
+
+        Collections.sort(files, new DropboxItem());
+        return files;
+    }
+
     public void reloadListView (ArrayList<DropboxItem> dropboxItems) {
 
+        ArrayList sortedItems = sortDropboxItems(dropboxItems);
         this.dropboxItems.removeAll(this.dropboxItems);
-        this.dropboxItems.addAll(dropboxItems);
+        this.dropboxItems.addAll(sortedItems);
 
         reloadData(this.dropboxItems);
     }

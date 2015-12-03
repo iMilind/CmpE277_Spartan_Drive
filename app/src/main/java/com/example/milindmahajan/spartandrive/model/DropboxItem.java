@@ -7,10 +7,12 @@ import com.dropbox.client2.DropboxAPI;
 import com.example.milindmahajan.spartandrive.R;
 import com.example.milindmahajan.spartandrive.utils.DateUtil;
 
+import java.util.Comparator;
+
 /**
  * Created by milind.mahajan on 11/28/15.
  */
-public class DropboxItem implements Parcelable {
+public class DropboxItem implements Parcelable, Comparator<DropboxItem> {
 
     String name;
     String path;
@@ -19,6 +21,7 @@ public class DropboxItem implements Parcelable {
     String modified;
     String parentPath;
     String size;
+    String extension;
 
 
     public DropboxItem() {
@@ -27,10 +30,10 @@ public class DropboxItem implements Parcelable {
 
     public DropboxItem(DropboxAPI.Entry entry) {
 
+        this.setDir(entry.isDir);
         this.setName(entry.fileName());
         this.setPath(entry.path);
         this.setShareLink("");
-        this.setDir(entry.isDir);
         this.setModified(entry.modified);
         this.setParentPath(entry.parentPath());
         this.setSize(entry.size);
@@ -39,11 +42,35 @@ public class DropboxItem implements Parcelable {
     public void setName(String name) {
 
         this.name = name;
+
+        try {
+
+            if(!this.isDir()) {
+
+                int dotIndex = name.lastIndexOf(".");
+                String fileExt = name.substring(dotIndex+1, name.length());
+
+                this.setExtension(fileExt);
+            }
+        } catch (Exception exc) {
+
+            exc.printStackTrace();
+        }
     }
 
     public String getName() {
 
         return this.name;
+    }
+
+    public void setExtension(String extension) {
+
+        this.extension = extension;
+    }
+
+    public String getExtension() {
+
+        return this.extension;
     }
 
     public void setPath(String path) {
@@ -108,27 +135,33 @@ public class DropboxItem implements Parcelable {
 
     public int getIcon() {
 
-        if (!this.isDir()) {
+        try {
 
-            int dotIndex = this.getPath().lastIndexOf(".");
-            String fileExt = this.getPath().substring(dotIndex, this.getPath().length() - 1);
+            if (!this.isDir()) {
 
-            if (fileExt.toLowerCase().contains("doc".toLowerCase())) {
+                int dotIndex = this.getPath().lastIndexOf(".");
+                String fileExt = this.getPath().substring(dotIndex, this.getPath().length() - 1);
 
-                return R.drawable.doc_icon;
-            } else if (fileExt.toLowerCase().contains("xls".toLowerCase())) {
+                if (fileExt.toLowerCase().contains("doc".toLowerCase())) {
 
-                return R.drawable.xls_icon;
-            } else if (fileExt.toLowerCase().contains("pdf".toLowerCase())) {
+                    return R.drawable.doc_icon;
+                } else if (fileExt.toLowerCase().contains("xls".toLowerCase())) {
 
-                return R.drawable.pdf_icon;
-            } else if (fileExt.toLowerCase().contains("ppt".toLowerCase())) {
+                    return R.drawable.xls_icon;
+                } else if (fileExt.toLowerCase().contains("pdf".toLowerCase())) {
 
-                return R.drawable.ppt_icon;
-            } else {
+                    return R.drawable.pdf_icon;
+                } else if (fileExt.toLowerCase().contains("ppt".toLowerCase())) {
 
-                return R.drawable.def_icon;
+                    return R.drawable.ppt_icon;
+                } else {
+
+                    return R.drawable.def_icon;
+                }
             }
+        } catch (Exception exc) {
+
+            return R.drawable.fol_icon;
         }
 
         return R.drawable.fol_icon;
@@ -141,13 +174,14 @@ public class DropboxItem implements Parcelable {
 
     public void writeToParcel(Parcel parcel, int flags) {
 
+        parcel.writeString(isDir);
         parcel.writeString(name);
         parcel.writeString(path);
         parcel.writeString(shareLink);
         parcel.writeString(modified);
         parcel.writeString(parentPath);
-        parcel.writeString(isDir);
         parcel.writeString(size);
+        parcel.writeString(extension);
     }
 
     public static final Parcelable.Creator<DropboxItem> CREATOR = new Creator<DropboxItem>() {
@@ -156,13 +190,14 @@ public class DropboxItem implements Parcelable {
 
             DropboxItem dropboxItem = new DropboxItem();
 
+            dropboxItem.setDir(Boolean.valueOf(source.readString()));
             dropboxItem.setName(source.readString());
             dropboxItem.setPath(source.readString());
             dropboxItem.setShareLink(source.readString());
             dropboxItem.setModified(source.readString());
             dropboxItem.setParentPath(source.readString());
-            dropboxItem.setDir(Boolean.valueOf(source.readString()));
             dropboxItem.setSize(source.readString());
+            dropboxItem.setExtension(source.readString());
 
             return dropboxItem;
         }
@@ -172,4 +207,10 @@ public class DropboxItem implements Parcelable {
             return new DropboxItem[size];
         }
     };
+
+    @Override
+    public int compare(DropboxItem lhs, DropboxItem rhs) {
+
+        return lhs.getName().compareTo(rhs.getName());
+    }
 }
