@@ -1,22 +1,24 @@
 package com.example.milindmahajan.spartandrive.activities;
 
 import android.app.Activity;
-import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
+import android.content.res.Configuration;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
-import android.os.Parcelable;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.InputType;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ListView;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.dropbox.client2.DropboxAPI;
@@ -34,9 +36,7 @@ import com.example.milindmahajan.spartandrive.utils.ListFilesTask;
 import com.example.milindmahajan.spartandrive.utils.ShareTask;
 import com.example.milindmahajan.spartandrive.utils.UploadTask;
 
-
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -45,6 +45,9 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
     private ActionMode actionMode;
 
+    private static final int FOLDER_SELECT_ACTIVITY_RESULT_MOVE = 13;
+    private static final int FOLDER_SELECT_ACTIVITY_RESULT_COPY = 14;
+    public static final int CANNOT_BE_MOVED = 15;
 
     private static final int CONTEXTMENU_OPTION_VIEW = 1;
     private static final int CONTEXTMENU_OPTION_DELETE = 2;
@@ -57,13 +60,16 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
     private int PICK_IMAGE = 0;
     private int PICK_PDF = 1;
     private DropboxItem rootFolder = new DropboxItem();
-
+    private String selectedFolderPath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#2196F3")));
 
         if (!ApplicationSettings.getSharedSettings().isAuthenticated()) {
 
@@ -98,6 +104,30 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
     }
 
     @Override
+    protected void onStart() {
+
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+
+        super.onStop();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle savedInstanceState) {
+
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+
+        super.onConfigurationChanged(newConfig);
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -110,25 +140,86 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
         int id = item.getItemId();
         String obj = "";
         Intent pickIntent = null;
-        switch (id)
-        {
-            case R.id.image:
-                pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                intentPicker("image",pickIntent);
 
-                return true;
 
-            case R.id.video:
-                pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
-                intentPicker("video",pickIntent);
-                return true;
+            switch (id)
+            {
+                case R.id.image:
+                    pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    intentPicker("image",pickIntent);
 
-            case R.id.docs:
-                showFileChooser();
-                return true;
+                    return true;
 
-        }
+                case R.id.video:
+                    pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
+                    intentPicker("video",pickIntent);
+                    return true;
+
+                case R.id.docs:
+                    showFileChooser();
+                    return true;
+
+                case R.id.item_create_folder:
+                    openAlertDialogue();
+                    return true;
+            }
+
         return super.onOptionsItemSelected(item);
+    }
+
+    private void openAlertDialogue () {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Folder name");
+        builder.setMessage("This folder will be created under " + rootFolder.getName());
+
+        final EditText folderNameInput = new EditText(this);
+
+        folderNameInput.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(folderNameInput);
+
+        builder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                MainActivity.this.createFolderWithName(folderNameInput.getText().toString());
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                dialog.cancel();
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        Button negativeButton = dialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+        negativeButton.setTextColor(Color.parseColor("#F44336"));
+
+        Button positiveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        positiveButton.setTextColor(Color.parseColor("#2196F3"));
+    }
+
+    private void createFolderWithName(String folderName) {
+
+        FileTasks f = (FileTasks) new FileTasks(MainActivity.this,
+                new FileTasks.AsyncResponse() {
+
+                    @Override
+                    public void processFinish(boolean result) {
+
+                        if(result) {
+
+                            refreshList(rootFolder.getPath());
+                        }
+                    }
+                }).execute(Common.METHOD_CREATE_FOLDER, rootFolder.getPath()+ File.separator+folderName);
     }
 
     public void intentPicker(String obj, Intent pickIntent)
@@ -167,6 +258,31 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
                     uploadFile(data, requestCode);
                 }
 
+            }
+            if (requestCode == FOLDER_SELECT_ACTIVITY_RESULT_MOVE) {
+
+                if (resultCode == MainActivity.RESULT_OK) {
+
+                    selectedFolderPath = new String( data.getStringExtra("folderPath"));
+
+                    moveDropboxItems(toBeMovedItems, selectedFolderPath);
+                } else if (resultCode == MainActivity.CANNOT_BE_MOVED) {
+
+                    showToast("Cannot be moved!");
+                }
+            }
+            if (requestCode == FOLDER_SELECT_ACTIVITY_RESULT_COPY && resultCode == MainActivity.RESULT_OK) {
+
+
+                if (resultCode == MainActivity.RESULT_OK) {
+
+                    selectedFolderPath = new String( data.getStringExtra("folderPath"));
+
+                    copyDropboxItems(toBeMovedItems, selectedFolderPath);
+                } else if (resultCode == MainActivity.CANNOT_BE_MOVED) {
+
+                    showToast("Cannot be copied!");
+                }
             }
         }
         catch(Exception e)
@@ -359,23 +475,20 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 
+            ListViewFragment listViewFragment = (ListViewFragment)getSupportFragmentManager()
+                    .findFragmentById(R.id.list_view_fragment);
+
             switch (item.getItemId()) {
 
                 case R.id.item_delete:
 
-                    ListViewFragment listViewFragment = (ListViewFragment)getSupportFragmentManager()
-                            .findFragmentById(R.id.list_view_fragment);
-
                     deleteFromDropbox(listViewFragment.selectedDropboxItems());
-
                     mode.finish();
                     return true;
 
                 case R.id.item_share:
-                    ListViewFragment listViewFragment1 = (ListViewFragment)getSupportFragmentManager()
-                            .findFragmentById(R.id.list_view_fragment);
-                    shareFromDropbox(listViewFragment1.selectedDropboxItems());
 
+                    shareFromDropbox(listViewFragment.selectedDropboxItems());
                     mode.finish();
                     return true;
 
@@ -386,11 +499,13 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
                 case R.id.item_move:
 
+                    startFolderSelectionIntent(listViewFragment.selectedDropboxItems(), FOLDER_SELECT_ACTIVITY_RESULT_MOVE);
                     mode.finish();
                     return true;
 
                 case R.id.item_copy:
 
+                    startFolderSelectionIntent(listViewFragment.selectedDropboxItems(), FOLDER_SELECT_ACTIVITY_RESULT_COPY);
                     mode.finish();
                     return true;
             }
@@ -476,7 +591,43 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
         }
     }
 
+    private void moveDropboxItems(final ArrayList <DropboxItem> dropboxItems, final String moveToPath) {
 
+        for (DropboxItem item : dropboxItems) {
+
+            FileTasks f = (FileTasks) new FileTasks(MainActivity.this,
+                    new FileTasks.AsyncResponse() {
+
+                        @Override
+                        public void processFinish(boolean result) {
+
+                            if(result) {
+
+                                refreshList(rootFolder.getPath());
+                            }
+                        }
+                    }).execute(Common.METHOD_MOVE, item.getPath(), moveToPath+"/"+item.getName());
+        }
+    }
+
+    private void copyDropboxItems(final ArrayList <DropboxItem> dropboxItems, final String copyToPath) {
+
+        for (DropboxItem item : dropboxItems) {
+
+            FileTasks f = (FileTasks) new FileTasks(MainActivity.this,
+                    new FileTasks.AsyncResponse() {
+
+                        @Override
+                        public void processFinish(boolean result) {
+
+                            if(result) {
+
+                                refreshList(rootFolder.getPath());
+                            }
+                        }
+                    }).execute(Common.METHOD_COPY, item.getPath(), copyToPath+"/"+item.getName());
+        }
+    }
 
     public void createDIR() throws DropboxException {
 
@@ -555,5 +706,25 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
     public void deleteDropboxItems(ArrayList <DropboxItem> toBeDeleted) {
 
         deleteFromDropbox(toBeDeleted);
+    }
+
+    ArrayList <DropboxItem> toBeMovedItems = new ArrayList<DropboxItem>();
+    public void moveDropboxItem(ArrayList <DropboxItem> toBeMoved) {
+
+        startFolderSelectionIntent(toBeMoved, FOLDER_SELECT_ACTIVITY_RESULT_MOVE);
+    }
+
+    public void copyDropboxItem(ArrayList <DropboxItem> toBeMoved) {
+
+        startFolderSelectionIntent(toBeMoved, FOLDER_SELECT_ACTIVITY_RESULT_COPY);
+    }
+
+    private void startFolderSelectionIntent(ArrayList <DropboxItem> toBeMoved, int intentCode) {
+
+        toBeMovedItems.removeAll(toBeMovedItems);
+        toBeMovedItems.addAll(toBeMoved);
+        Intent folderSelectIntent = new Intent(getApplicationContext(), FolderSelectionActivity.class);
+        folderSelectIntent.putExtra("parentFolder", toBeMoved.get(0));
+        startActivityForResult(folderSelectIntent, intentCode);
     }
 }

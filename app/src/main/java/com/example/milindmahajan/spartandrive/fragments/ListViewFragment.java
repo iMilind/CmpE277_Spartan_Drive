@@ -2,6 +2,7 @@ package com.example.milindmahajan.spartandrive.fragments;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -50,6 +51,9 @@ public class ListViewFragment extends Fragment {
 
         public void deleteDropboxItems(ArrayList <DropboxItem> toBeDeleted);
         public void shareFromDropbox(ArrayList <DropboxItem> toBeShared);
+
+        public void moveDropboxItem(ArrayList <DropboxItem> toBeMoved);
+        public void copyDropboxItem(ArrayList <DropboxItem> toBeMoved);
 
         public void beginContextualActionMode(ArrayList <DropboxItem> selectedItems);
         public void endContextualActionMode();
@@ -152,9 +156,9 @@ public class ListViewFragment extends Fragment {
 
             case CONTEXTMENU_OPTION_DELETE:
 
-                ArrayList <DropboxItem> selectedItem = new ArrayList<DropboxItem>();
-                selectedItem.add(this.dropboxItems.get(contextMenuInfo.position));
-                listViewFragmentListener.deleteDropboxItems(selectedItem);
+                ArrayList <DropboxItem> itemsToDelete = new ArrayList<DropboxItem>();
+                itemsToDelete.add(this.dropboxItems.get(contextMenuInfo.position));
+                listViewFragmentListener.deleteDropboxItems(itemsToDelete);
                 break;
 
             case CONTEXTMENU_OPTION_SHARE:
@@ -170,10 +174,16 @@ public class ListViewFragment extends Fragment {
 
             case CONTEXTMENU_OPTION_MOVE:
 
+                ArrayList <DropboxItem> itemsToMove = new ArrayList<DropboxItem>();
+                itemsToMove.add(this.dropboxItems.get(contextMenuInfo.position));
+                listViewFragmentListener.moveDropboxItem(itemsToMove);
                 break;
 
             case CONTEXTMENU_OPTION_COPY:
 
+                ArrayList <DropboxItem> itemsToCopy = new ArrayList<DropboxItem>();
+                itemsToCopy.add(this.dropboxItems.get(contextMenuInfo.position));
+                listViewFragmentListener.copyDropboxItem(itemsToCopy);
                 break;
 
             case CONTEXTMENU_OPTION_CANCEL:
@@ -283,9 +293,14 @@ public class ListViewFragment extends Fragment {
 
             TextView title = (TextView)convertView.findViewById(R.id.title);
             title.setText(dropboxItem.getName());
+            title.setTextColor(Color.parseColor("#424242"));
 
             TextView modified = (TextView)convertView.findViewById(R.id.modified);
             modified.setText(dropboxItem.getModified());
+
+            TextView size = (TextView)convertView.findViewById(R.id.size);
+            size.setText(dropboxItem.getSize());
+            size.setVisibility(dropboxItem.isDir() ? View.INVISIBLE : View.VISIBLE);
 
             final CheckBox checkBox = (CheckBox)convertView.findViewById(R.id.checkBox);
             checkBox.setChecked(listViewAdapter.isSelected(dropboxItems.get(position)));

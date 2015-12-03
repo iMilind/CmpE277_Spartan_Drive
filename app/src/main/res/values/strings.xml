@@ -14,4 +14,8 @@
 
     <string name="title_activity_file_preview">File Preview</string>
 
+    <string name="title_activity_folder_selection">Select Folder</string>
+    <string name="folder_select_cancel">Cancel</string>
+    <string name="folder_select_select">Select</string>
+
 </resources>
