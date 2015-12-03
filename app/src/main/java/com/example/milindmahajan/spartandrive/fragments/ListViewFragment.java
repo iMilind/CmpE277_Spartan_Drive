@@ -42,6 +42,7 @@ public class ListViewFragment extends Fragment {
     private static final int CONTEXTMENU_OPTION_MOVE = 5;
     private static final int CONTEXTMENU_OPTION_COPY = 6;
     private static final int CONTEXTMENU_OPTION_CANCEL = 7;
+    private static final int CONTEXTMENU_OPTION_INFO = 8;
 
     ListViewFragmentProtocol listViewFragmentListener;
     public interface  ListViewFragmentProtocol {
@@ -50,6 +51,7 @@ public class ListViewFragment extends Fragment {
 
         public void deleteDropboxItems(ArrayList <DropboxItem> toBeDeleted);
         public void shareFromDropbox(ArrayList <DropboxItem> toBeShared);
+        public void getAcctInfo();
 
         public void moveDropboxItem(ArrayList <DropboxItem> toBeMoved);
         public void copyDropboxItem(ArrayList <DropboxItem> toBeMoved);
@@ -139,6 +141,7 @@ public class ListViewFragment extends Fragment {
         menu.add(Menu.NONE, CONTEXTMENU_OPTION_MOVE, 4, "Move");
         menu.add(Menu.NONE, CONTEXTMENU_OPTION_COPY, 5, "Copy");
         menu.add(Menu.NONE, CONTEXTMENU_OPTION_CANCEL, 6, "Cancel");
+        menu.add(Menu.NONE, CONTEXTMENU_OPTION_INFO,8,"Info");
     }
 
     @Override
@@ -165,6 +168,14 @@ public class ListViewFragment extends Fragment {
                 ArrayList <DropboxItem> selectedItemToShare = new ArrayList<DropboxItem>();
                 selectedItemToShare.add(this.dropboxItems.get(contextMenuInfo.position));
                 listViewFragmentListener.shareFromDropbox(selectedItemToShare);
+
+
+                break;
+
+            case CONTEXTMENU_OPTION_INFO:
+                ArrayList <DropboxItem> acctInfo = new ArrayList<DropboxItem>();
+                acctInfo.add(this.dropboxItems.get(contextMenuInfo.position));
+                listViewFragmentListener.getAcctInfo();
                 break;
 
             case CONTEXTMENU_OPTION_DOWNLOAD:

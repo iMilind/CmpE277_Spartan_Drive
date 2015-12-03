@@ -1,37 +1,34 @@
 package com.example.milindmahajan.spartandrive.activities;
 
-import com.example.milindmahajan.spartandrive.utils.FileTasks;
-
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
-
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
-
-
 import android.support.v7.app.AppCompatActivity;
+import android.text.InputType;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ListView;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.android.AndroidAuthSession;
 import com.dropbox.client2.exception.DropboxException;
-
 import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
 import com.example.milindmahajan.spartandrive.R;
 import com.example.milindmahajan.spartandrive.fragments.ListViewFragment;
 import com.example.milindmahajan.spartandrive.model.DropboxItem;
 import com.example.milindmahajan.spartandrive.singletons.ApplicationSettings;
+import com.example.milindmahajan.spartandrive.utils.AccountInfo;
 import com.example.milindmahajan.spartandrive.utils.Common;
 import com.example.milindmahajan.spartandrive.utils.FileTasks;
 import com.example.milindmahajan.spartandrive.utils.ListFilesTask;
@@ -39,10 +36,12 @@ import com.example.milindmahajan.spartandrive.utils.ShareTask;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements ListViewFragment.ListViewFragmentProtocol {
 
     private ActionMode actionMode;
+    private String m_Text = "";
 
     private static final int FOLDER_SELECT_ACTIVITY_RESULT_MOVE = 13;
     private static final int FOLDER_SELECT_ACTIVITY_RESULT_COPY = 14;
@@ -377,7 +376,8 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
                 case R.id.item_share:
 
-                    shareFromDropbox(listViewFragment.selectedDropboxItems());
+                    //shareFromDropbox(listViewFragment.selectedDropboxItems());
+                    getAcctInfo();
                     mode.finish();
                     return true;
 
@@ -441,6 +441,19 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
         }
     }
 
+    public void getAcctInfo(){
+
+        AccountInfo acctInfo = (AccountInfo) new AccountInfo(MainActivity.this, new AccountInfo.AsyncResponse() {
+
+            @Override
+            public void processFinish(Map<String, String> result) {
+
+                acctInfoDialogBox(result);
+
+            }
+        }).execute();
+
+    }
     public void shareFromDropbox(final ArrayList<DropboxItem> dropboxItems) {
 
         final ArrayList<String> shareUrls = new ArrayList<String>();
@@ -468,8 +481,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
                                     builder.append(shareUrls.get(i));
                                 }
                             }
-//Sharing with email ids
-                            Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto: ?subject=" +
+                            Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:?subject=" +
                                     Uri.encode("File shared from SpartaDrive") + "&body=" +
                                     Uri.encode(builder.toString())));
                             startActivity(intent);
@@ -479,6 +491,100 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
             }).execute(item);
 
         }
+    }
+
+    private void sendEmailDialogBox(){
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Account Info");
+
+        final EditText emailId = new EditText(this);
+
+        builder.setView(emailId);
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                m_Text=emailId.getText().toString();
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
+    }
+
+
+
+    private void acctInfoDialogBox(final Map<String, String> result){
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Account Info");
+
+        final EditText acctName = new EditText(this);
+        final EditText sharedQuota = new EditText(this);
+        final EditText quota = new EditText(this);
+        final EditText email = new EditText(this);
+        final EditText freeSpace = new EditText(this);
+
+        Context context = getApplicationContext();
+        LinearLayout layout = new LinearLayout(context);
+        layout.setOrientation(LinearLayout.VERTICAL);
+
+
+        acctName.setText("Account Name: " + result.get("accountName"));
+        acctName.setFocusable(false);
+        acctName.setInputType(InputType.TYPE_CLASS_TEXT);
+        //builder.setView(acctName);
+
+        sharedQuota.setText("Shared Quota: " + result.get("sharedQuota"));
+        sharedQuota.setFocusable(false);
+        sharedQuota.setInputType(InputType.TYPE_CLASS_TEXT);
+        //builder.setView(sharedQuota);
+
+        quota.setText("Size: " + result.get("quota"));
+        quota.setFocusable(false);
+        quota.setInputType(InputType.TYPE_CLASS_TEXT);
+        //builder.setView(quota);
+
+        email.setText("Email: " + result.get("email"));
+        email.setFocusable(false);
+        email.setInputType(InputType.TYPE_CLASS_TEXT);
+        //builder.setView(email);
+
+
+        freeSpace.setText("Free Space: " + result.get("freeSpace"));
+        freeSpace.setFocusable(false);
+        freeSpace.setInputType(InputType.TYPE_CLASS_TEXT);
+        //builder.setView(freeSpace);
+
+        layout.addView(acctName);
+        layout.addView(sharedQuota);
+        layout.addView(quota);
+        layout.addView(email);
+        layout.addView(freeSpace);
+
+
+        builder.setView(layout);
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
     }
 
     private void moveDropboxItems(final ArrayList <DropboxItem> dropboxItems, final String moveToPath) {
@@ -506,7 +612,6 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
             FileTasks f = (FileTasks) new FileTasks(MainActivity.this,
                     new FileTasks.AsyncResponse() {
-
                         @Override
                         public void processFinish(boolean result) {
                             if(result) {
@@ -554,7 +659,6 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
             public void processFinish(String result) {
 
                 if (result != null) {
-
                     dropboxItem.setShareLink(result);
                     Intent filePreviewIntent = new Intent(getApplicationContext(), FilePreviewActivity.class);
                     filePreviewIntent.putExtra("dropboxItem", dropboxItem);

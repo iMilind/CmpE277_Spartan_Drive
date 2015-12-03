@@ -12,6 +12,14 @@
     </item>
 
     <item
+        android:id="@+id/item_acctinfo"
+        android:icon="@android:drawable/ic_menu_delete"
+        yourapp:showAsAction="always"
+        android:titleCondensed="Account Info"
+        android:title="Account Info">
+    </item>
+
+    <item
         android:id="@+id/item_share"
         android:icon="@android:drawable/ic_menu_share"
         yourapp:showAsAction="always"

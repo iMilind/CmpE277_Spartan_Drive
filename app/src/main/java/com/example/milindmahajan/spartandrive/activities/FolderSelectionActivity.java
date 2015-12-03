@@ -92,12 +92,16 @@ public class FolderSelectionActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> av, View v, int pos,
                                     long id) {
+                Boolean flag=true;
 
                 CheckBox checkBox = (CheckBox)v.findViewById(R.id.select_folder_checkBox);
-                checkBox.setChecked(!checkBox.isChecked());
+
+                    checkBox.setChecked(!checkBox.isChecked());
+
             }
         });
     }
+
 
     public void didTouchCancelButton (View cancelButton) {
 
@@ -108,16 +112,19 @@ public class FolderSelectionActivity extends AppCompatActivity {
 
     public void didTouchSelectButton (View cancelButton) {
 
-        if (selectedPath.length() != 0) {
-
+        if(selectedPath.length() == 1) {
             Intent selectIntent = new Intent();
             selectIntent.putExtra("folderPath", selectedPath);
             setResult(MainActivity.RESULT_OK, selectIntent);
             finish();
-        } else {
-
+        }else if(selectedPath.length() > 1){
+            Toast error = Toast.makeText(this, "Select only one folder!", Toast.LENGTH_LONG);
+            error.show();
+            finish();
+        }else {
             Toast error = Toast.makeText(this, "No folder selected!", Toast.LENGTH_LONG);
             error.show();
+            finish();
         }
     }
 
@@ -196,7 +203,7 @@ public class FolderSelectionActivity extends AppCompatActivity {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
-                    if(isChecked) {
+                    if (isChecked) {
 
                         finalConvertView.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), android.R.color.holo_red_light));
                         selectedPath = dropboxItem.getPath();
