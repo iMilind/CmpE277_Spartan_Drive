@@ -142,11 +142,7 @@ public class MainActivity
             return;
         }
 
-        if (folderStack.size() > 1) {
-
-            folderStack.pop();
-            refreshList();
-        }
+        popFolderFromStack();
     }
 
     @Override
@@ -441,7 +437,8 @@ public class MainActivity
 
     public void refreshList() {
 
-        DropboxItem rootFolder = getTop();
+        final DropboxItem rootFolder = getTop();
+        setTitle(rootFolder.getName());
         ListFilesTask t = (ListFilesTask) new ListFilesTask(new ListFilesTask.AsyncResponse() {
 
             @Override
@@ -457,7 +454,8 @@ public class MainActivity
 
                 ListViewFragment listViewFragment = (ListViewFragment)getSupportFragmentManager()
                         .findFragmentById(R.id.list_view_fragment);
-                listViewFragment.reloadListView(result);
+
+                listViewFragment.reloadListView(result, !rootFolder.getName().equalsIgnoreCase("Spartan Drive"));
             }
         }).execute(rootFolder.getPath());
     }
@@ -551,7 +549,14 @@ public class MainActivity
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
 
-            mode.getMenuInflater().inflate(R.menu.contextual_list_view, menu);
+            try {
+
+                mode.getMenuInflater().inflate(R.menu.contextual_list_view, menu);
+            } catch (Exception exc) {
+
+                exc.printStackTrace();
+                System.out.println("Sys exc is "+exc.getLocalizedMessage());
+            }
 
             return true;
         }
@@ -834,9 +839,6 @@ public class MainActivity
                         if (temp.size() == 0) {
 
                             refreshList();
-                        } else {
-
-                            listViewFragment.reloadListView(temp);
                         }
                     }
                 }
@@ -1004,18 +1006,34 @@ public class MainActivity
 
     @Override
     public DropboxItem getRootFolder() {
+
         return getTop();
     }
 
     @Override
     public void refreshRootFolder() {
+
         refreshList();
+    }
+
+    public void backPressed () {
+
+        popFolderFromStack();
     }
 
     private void pushFolderOnStack(DropboxItem folder) {
 
         folderStack.push(folder);
         refreshList();
+    }
+
+    private void popFolderFromStack () {
+
+        if (folderStack.size() > 1) {
+
+            folderStack.pop();
+            refreshList();
+        }
     }
 
     private DropboxItem getTop () {

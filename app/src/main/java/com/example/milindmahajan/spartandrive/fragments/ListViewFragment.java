@@ -32,6 +32,7 @@ import com.example.milindmahajan.spartandrive.R;
 import com.example.milindmahajan.spartandrive.model.DropboxItem;
 import com.example.milindmahajan.spartandrive.utils.SearchTask;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -75,6 +76,7 @@ public class ListViewFragment extends Fragment {
 
         public DropboxItem getRootFolder();
         public void refreshRootFolder();
+        public void backPressed();
     }
 
     @Override
@@ -152,7 +154,7 @@ public class ListViewFragment extends Fragment {
                                 result.add(dropboxItem);
                             }
 
-                            reloadListView(result);
+                            reloadListView(result, false);
                         }
                     }, listViewFragmentListener.getRootFolder().getPath(), searchQuery).execute();
                 } else {
@@ -217,16 +219,19 @@ public class ListViewFragment extends Fragment {
         super.onCreateContextMenu(menu, v, menuInfo);
 
         AdapterView.AdapterContextMenuInfo contextMenuInfo = (AdapterView.AdapterContextMenuInfo) menuInfo;
-        menu.setHeaderTitle(this.dropboxItems.get(contextMenuInfo.position).getName());
+        if (!this.dropboxItems.get(contextMenuInfo.position).getName().equalsIgnoreCase("...")) {
 
-        menu.add(Menu.NONE, CONTEXTMENU_OPTION_VIEW, 0, "View");
-        menu.add(Menu.NONE, CONTEXTMENU_OPTION_DELETE, 1, "Delete");
-        menu.add(Menu.NONE, CONTEXTMENU_OPTION_SHARE, 2, "Share");
-        menu.add(Menu.NONE, CONTEXTMENU_OPTION_DOWNLOAD, 3, "Download");
-        menu.add(Menu.NONE, CONTEXTMENU_OPTION_MOVE, 4, "Move");
-        menu.add(Menu.NONE, CONTEXTMENU_OPTION_COPY, 5, "Copy");
-        menu.add(Menu.NONE, CONTEXTMENU_OPTION_RENAME, 6, "Rename");
-        menu.add(Menu.NONE, CONTEXTMENU_OPTION_CANCEL, 7, "Cancel");
+            menu.setHeaderTitle(this.dropboxItems.get(contextMenuInfo.position).getName());
+
+            menu.add(Menu.NONE, CONTEXTMENU_OPTION_VIEW, 0, "View");
+            menu.add(Menu.NONE, CONTEXTMENU_OPTION_DELETE, 1, "Delete");
+            menu.add(Menu.NONE, CONTEXTMENU_OPTION_SHARE, 2, "Share");
+            menu.add(Menu.NONE, CONTEXTMENU_OPTION_DOWNLOAD, 3, "Download");
+            menu.add(Menu.NONE, CONTEXTMENU_OPTION_MOVE, 4, "Move");
+            menu.add(Menu.NONE, CONTEXTMENU_OPTION_COPY, 5, "Copy");
+            menu.add(Menu.NONE, CONTEXTMENU_OPTION_RENAME, 6, "Rename");
+            menu.add(Menu.NONE, CONTEXTMENU_OPTION_CANCEL, 7, "Cancel");
+        }
     }
 
     @Override
@@ -295,7 +300,13 @@ public class ListViewFragment extends Fragment {
             public void onItemClick(AdapterView<?> av, View v, int pos,
                                     long id) {
 
-                listViewFragmentListener.viewDropboxItem(dropboxItems.get(pos));
+                if (dropboxItems.get(pos).getName().equalsIgnoreCase("...")) {
+
+                    listViewFragmentListener.backPressed();
+                } else {
+
+                    listViewFragmentListener.viewDropboxItem(dropboxItems.get(pos));
+                }
             }
         });
     }
@@ -342,11 +353,19 @@ public class ListViewFragment extends Fragment {
         return files;
     }
 
-    public void reloadListView (ArrayList<DropboxItem> dropboxItems) {
+    public void reloadListView (ArrayList<DropboxItem> dropboxItems, boolean backEnabled) {
 
         ArrayList sortedItems = sortDropboxItems(dropboxItems);
         this.dropboxItems.removeAll(this.dropboxItems);
         this.dropboxItems.addAll(sortedItems);
+        if (backEnabled) {
+
+            DropboxItem backItem = new DropboxItem();
+            backItem.setName("...");
+            backItem.setPath(listViewFragmentListener.getRootFolder().getPath()+ File.separator+backItem.getName());
+
+            this.dropboxItems.add(0, backItem);
+        }
 
         reloadData(this.dropboxItems);
     }
@@ -437,13 +456,13 @@ public class ListViewFragment extends Fragment {
 
             TextView itemInfoToggle = (TextView)convertView.findViewById(R.id.modified);
             itemInfoToggle.setTextColor(Color.parseColor("#666666"));
-            if(searchMode)
-            {
-                itemInfoToggle.setText("in ..." + dropboxItem.getParentPath());
+            if(searchMode) {
+
+                itemInfoToggle.setText("in.. " + dropboxItem.getParentPath());
                 itemInfoToggle.setTypeface(null, Typeface.ITALIC);
             }
-            else
-            {
+            else {
+
                 itemInfoToggle.setText(dropboxItem.getModified());
                 itemInfoToggle.setTypeface(null, Typeface.NORMAL);
             }
@@ -461,6 +480,14 @@ public class ListViewFragment extends Fragment {
 
             final CheckBox checkBox = (CheckBox)convertView.findViewById(R.id.checkBox);
             checkBox.setChecked(listViewAdapter.isSelected(dropboxItems.get(position)));
+
+            if (dropboxItem.getName().equalsIgnoreCase("...")) {
+
+                size.setVisibility(View.INVISIBLE);
+                checkBox.setVisibility(View.INVISIBLE);
+                imageView.setVisibility(View.INVISIBLE);
+                itemInfoToggle.setVisibility(View.INVISIBLE);
+            }
 
             checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
