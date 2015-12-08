@@ -156,8 +156,8 @@ public class MainActivity
         String obj = "";
         Intent pickIntent = null;
 
-        switch (id)
-        {
+        switch (id) {
+
             case R.id.image:
                 pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 intentPicker("image",pickIntent);
@@ -250,8 +250,8 @@ public class MainActivity
                 }).execute(Common.METHOD_CREATE_FOLDER, getTop().getPath()+ File.separator+folderName);
     }
 
-    public void intentPicker(String obj, Intent pickIntent)
-    {
+    public void intentPicker(String obj, Intent pickIntent) {
+
         String type = obj+"/*";
         Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
         getIntent.setType(type);
@@ -262,7 +262,9 @@ public class MainActivity
         startActivityForResult(chooserIntent, PICK_IMAGE);
 
     }
+
     private void showFileChooser() {
+
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("application/pdf");
         intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -274,19 +276,21 @@ public class MainActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         super.onActivityResult(requestCode, resultCode, data);
-        try
-        {
+        try {
+
             if ((requestCode == PICK_IMAGE || requestCode == PICK_PDF) && resultCode == Activity.RESULT_OK) {
+
                 if (data == null) {
-                    //Display an error
+
                     return;
                 }
-                else
-                {
+                else {
+
                     uploadFile(data, requestCode);
                 }
 
             }
+
             if (requestCode == FOLDER_SELECT_ACTIVITY_RESULT_MOVE) {
 
                 if (resultCode == MainActivity.RESULT_OK) {
@@ -299,6 +303,7 @@ public class MainActivity
                     showToast("Cannot be moved!");
                 }
             }
+
             if (requestCode == FOLDER_SELECT_ACTIVITY_RESULT_COPY && resultCode == MainActivity.RESULT_OK) {
 
 
@@ -313,8 +318,8 @@ public class MainActivity
                 }
             }
         }
-        catch(Exception e)
-        {
+        catch(Exception e) {
+
             e.printStackTrace();
             Log.d("intent_result","reached here");
         }
@@ -333,8 +338,7 @@ public class MainActivity
         Log.d("intent_result", "reached here");
     }
 
-    private String getFileName(Intent data, int requestCode)
-    {
+    private String getFileName(Intent data, int requestCode) {
 
         String path = data.getData().getPath();
         String[] pathArr = null;
@@ -342,15 +346,16 @@ public class MainActivity
         String baseName = "";
         String type = getContentResolver().getType(data.getData());
 
-        if(requestCode == 0)
-        {
+        if(requestCode == 0) {
+
             pathArr = path.split(File.separator);
 
         }
-        else if(requestCode == 1)
-        {
+        else if(requestCode == 1) {
+
             pathArr = path.split("=");
         }
+
         fileName = pathArr[pathArr.length-1];
         pathArr = type.split(File.separator);
         baseName = pathArr[0];
@@ -361,6 +366,7 @@ public class MainActivity
 
         return  fileName;
     }
+
     private AndroidAuthSession buildSession() {
 
         AppKeyPair appKeyPair = new AppKeyPair(Common.APP_KEY, Common.APP_SECRET);
@@ -403,10 +409,10 @@ public class MainActivity
             }
         }
 
-        if(mLoggedIn)
-        {
-            try
-            {
+        if(mLoggedIn) {
+
+            try {
+
                 createDIR();
             }
             catch (DropboxException e) {
@@ -415,7 +421,6 @@ public class MainActivity
                 showToast("Error creating SpartanDrive Folder..Please contact Administrator");
             }
         }
-
     }
 
     private void showToast(String msg) {
@@ -432,7 +437,6 @@ public class MainActivity
 
             onResume = false;
         }
-
     }
 
     public void refreshList() {
@@ -450,6 +454,7 @@ public class MainActivity
                     DropboxItem dropboxItem = new DropboxItem(e);
                     result.add(dropboxItem);
                 }
+
                 ListViewFragment listViewFragment = (ListViewFragment)getSupportFragmentManager()
                         .findFragmentById(R.id.list_view_fragment);
                 listViewFragment.reloadListView(result);
@@ -690,7 +695,7 @@ public class MainActivity
     }
 
 
-    private void acctInfoDialogBox(final AccountInfo accountInfo){
+    private void acctInfoDialogBox(final AccountInfo accountInfo) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Account Info");
@@ -806,7 +811,6 @@ public class MainActivity
             @Override
             public void processFinish(ArrayList<DropboxAPI.Entry> output) {
 
-                // SpartanDrive Folder does not exist.. create it
                 if(output.size()==0) {
 
                     FileTasks f = (FileTasks)new FileTasks(MainActivity.this, new FileTasks.AsyncResponse() {
@@ -814,7 +818,6 @@ public class MainActivity
                         @Override
                         public void processFinish(boolean result) {
 
-                            //refreshList(Common.rootDIR);
 
                         }
                     }).execute(Common.METHOD_CREATE_FOLDER, getTop().getPath());
@@ -839,7 +842,6 @@ public class MainActivity
                 }
             }
         }).execute(Common.rootDIR);
-
     }
 
     public void viewFile(final DropboxItem dropboxItem) {

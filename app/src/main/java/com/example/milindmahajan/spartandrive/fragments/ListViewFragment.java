@@ -8,8 +8,6 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.KeyEvent;
@@ -32,7 +30,6 @@ import android.widget.TextView;
 import com.dropbox.client2.DropboxAPI;
 import com.example.milindmahajan.spartandrive.R;
 import com.example.milindmahajan.spartandrive.model.DropboxItem;
-import com.example.milindmahajan.spartandrive.utils.Common;
 import com.example.milindmahajan.spartandrive.utils.SearchTask;
 
 import java.util.ArrayList;
@@ -42,18 +39,16 @@ import java.util.List;
 /**
  * Created by milind.mahajan on 11/30/15.
  */
-public class ListViewFragment extends Fragment{
+public class ListViewFragment extends Fragment {
 
     private View parentView;
     ArrayList <DropboxItem> dropboxItems = new ArrayList<DropboxItem>();
     private ListViewAdapter listViewAdapter;
 
-    private EditText searchField;
     private static final int CONTEXTMENU_OPTION_VIEW = 1;
     private static final int CONTEXTMENU_OPTION_DELETE = 2;
     private static final int CONTEXTMENU_OPTION_SHARE = 3;
     private static boolean searchMode;
-
 
     private static final int CONTEXTMENU_OPTION_DOWNLOAD = 4;
     private static final int CONTEXTMENU_OPTION_MOVE = 5;
@@ -62,6 +57,7 @@ public class ListViewFragment extends Fragment{
     private static final int CONTEXTMENU_OPTION_CANCEL = 8;
 
     ListViewFragmentProtocol listViewFragmentListener;
+
     public interface  ListViewFragmentProtocol {
 
         public void viewDropboxItem(DropboxItem dropboxItem);
@@ -103,7 +99,6 @@ public class ListViewFragment extends Fragment{
         ListView listView = (ListView)parentView.findViewById(R.id.list_view);
         registerForContextMenu(listView);
 
-        searchField = (EditText) parentView.findViewById(R.id.searchField);
         addTextChangeListener();
         addClickListener();
 
@@ -176,6 +171,7 @@ public class ListViewFragment extends Fragment{
             }
         });
     }
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
 

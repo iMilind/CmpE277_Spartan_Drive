@@ -43,7 +43,6 @@ public class FolderSelectionActivity extends AppCompatActivity {
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#5AC5A7")));
-//        actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#1565C0")));
 
         addClickListener();
 
