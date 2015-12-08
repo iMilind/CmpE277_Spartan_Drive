@@ -45,8 +45,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Stack;
 
-public class MainActivity extends AppCompatActivity implements ListViewFragment.ListViewFragmentProtocol {
+public class MainActivity
+        extends AppCompatActivity
+        implements ListViewFragment.ListViewFragmentProtocol {
 
     private ActionMode actionMode;
 
@@ -57,8 +60,10 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
     private boolean mLoggedIn, onResume;
     private int PICK_IMAGE = 0;
     private int PICK_PDF = 1;
-    private DropboxItem rootFolder = new DropboxItem();
+
     private String selectedFolderPath;
+
+    private Stack <DropboxItem> folderStack = new Stack<DropboxItem>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,29 +81,15 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
             Common.getDropboxObj().getSession().startOAuth2Authentication(MainActivity.this);
         }
 
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
+        if (folderStack.empty()) {
 
-            rootFolder = extras.getParcelable("rootFolder");
-        } else {
-
-            rootFolder.setDir(true);
-            rootFolder.setName("Spartan Drive");
-            rootFolder.setPath(Common.rootDIR);
-        }
-
-        try {
-
-            setTitle(rootFolder.getName());
-        } catch (Exception exc) {
-
-            rootFolder = new DropboxItem();
+            DropboxItem rootFolder = new DropboxItem();
 
             rootFolder.setDir(true);
             rootFolder.setName("Spartan Drive");
             rootFolder.setPath(Common.rootDIR);
 
-            setTitle(rootFolder.getName());
+            folderStack.push(rootFolder);
         }
     }
 
@@ -142,37 +133,54 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
     }
 
     @Override
+    public void onBackPressed() {
+
+        ListViewFragment listViewFragment = (ListViewFragment)getSupportFragmentManager().findFragmentById(R.id.list_view_fragment);
+        if (listViewFragment.isSearchModeOn()) {
+
+            listViewFragment.setSearchMode(false);
+            return;
+        }
+
+        if (folderStack.size() > 1) {
+
+            folderStack.pop();
+            refreshList();
+        }
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
         int id = item.getItemId();
         String obj = "";
         Intent pickIntent = null;
 
-            switch (id)
-            {
-                case R.id.image:
-                    pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                    intentPicker("image",pickIntent);
+        switch (id)
+        {
+            case R.id.image:
+                pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                intentPicker("image",pickIntent);
 
-                    return true;
+                return true;
 
-                case R.id.video:
-                    pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
-                    intentPicker("video",pickIntent);
-                    return true;
+            case R.id.video:
+                pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
+                intentPicker("video",pickIntent);
+                return true;
 
-                case R.id.docs:
-                    showFileChooser();
-                    return true;
+            case R.id.docs:
+                showFileChooser();
+                return true;
 
-                case R.id.item_create_folder:
-                    openAlertDialogueForCreateFolder();
-                    return true;
+            case R.id.item_create_folder:
+                openAlertDialogueForCreateFolder();
+                return true;
 
-                case R.id.action_acc_info:
-                    getAcctInfo();
-                    return true;
-            }
+            case R.id.action_acc_info:
+                getAcctInfo();
+                return true;
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -181,7 +189,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Folder name");
-        builder.setMessage("This folder will be created under " + rootFolder.getName());
+        builder.setMessage("This folder will be created under " + getTop().getName());
 
         final EditText folderNameInput = new EditText(this);
 
@@ -236,10 +244,10 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
                         if(result) {
 
-                            refreshList(rootFolder.getPath());
+                            refreshList();
                         }
                     }
-                }).execute(Common.METHOD_CREATE_FOLDER, rootFolder.getPath()+ File.separator+folderName);
+                }).execute(Common.METHOD_CREATE_FOLDER, getTop().getPath()+ File.separator+folderName);
     }
 
     public void intentPicker(String obj, Intent pickIntent)
@@ -349,7 +357,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
         type = pathArr[1];
 
         fileName = baseName + "_" + fileName + "." + type;
-        fileName = rootFolder.getPath() + File.separator + fileName;
+        fileName = getTop().getPath() + File.separator + fileName;
 
         return  fileName;
     }
@@ -427,8 +435,9 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
     }
 
-    public void refreshList(String path)
-    {
+    public void refreshList() {
+
+        DropboxItem rootFolder = getTop();
         ListFilesTask t = (ListFilesTask) new ListFilesTask(new ListFilesTask.AsyncResponse() {
 
             @Override
@@ -445,7 +454,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
                         .findFragmentById(R.id.list_view_fragment);
                 listViewFragment.reloadListView(result);
             }
-        }).execute(path);
+        }).execute(rootFolder.getPath());
     }
 
 
@@ -566,7 +575,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
                             if(result) {
 
-                                refreshList(rootFolder.getPath());
+                                refreshList();
                             }
                         }
                     }).execute(Common.METHOD_DELETE, item.getPath());
@@ -764,7 +773,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
                             if(result) {
 
-                                refreshList(rootFolder.getPath());
+                                refreshList();
                             }
                         }
                     }).execute(Common.METHOD_MOVE, item.getPath(), moveToPath+"/"+item.getName());
@@ -783,7 +792,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
                             if(result) {
 
-                                refreshList(rootFolder.getPath());
+                                refreshList();
                             }
                         }
                     }).execute(Common.METHOD_COPY, item.getPath(), copyToPath+"/"+item.getName());
@@ -808,20 +817,20 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
                             //refreshList(Common.rootDIR);
 
                         }
-                    }).execute(Common.METHOD_CREATE_FOLDER, rootFolder.getPath());
+                    }).execute(Common.METHOD_CREATE_FOLDER, getTop().getPath());
                 } else {
 
                     ListViewFragment listViewFragment = (ListViewFragment) getSupportFragmentManager().
                             findFragmentById(R.id.list_view_fragment);
                     if (!listViewFragment.isSearchModeOn()) {
 
-                        refreshList(rootFolder.getPath());
+                        refreshList();
                     } else {
 
                         ArrayList temp = listViewFragment.dropboxItems();
                         if (temp.size() == 0) {
 
-                            refreshList(rootFolder.getPath());
+                            refreshList();
                         } else {
 
                             listViewFragment.reloadListView(temp);
@@ -851,18 +860,12 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
         }).execute(dropboxItem);
     }
 
-    public void openFolder (DropboxItem dropboxItem) {
-
-        Intent folderNavigatorIntent = new Intent(getApplicationContext(), MainActivity.class);
-        folderNavigatorIntent.putExtra("rootFolder", dropboxItem);
-        startActivity(folderNavigatorIntent);
-    }
-
     public void viewDropboxItem(final DropboxItem dropboxItem) {
 
         if (dropboxItem.isDir()) {
 
-            openFolder(dropboxItem);
+            pushFolderOnStack(dropboxItem);
+
         } else {
 
             viewFile(dropboxItem);
@@ -978,7 +981,7 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
                             if(result) {
 
-                                refreshList(rootFolder.getPath());
+                                refreshList();
                             }
                         }
                     }).execute(Common.METHOD_RENAME, selectedItem.getPath(), name);
@@ -999,11 +1002,22 @@ public class MainActivity extends AppCompatActivity implements ListViewFragment.
 
     @Override
     public DropboxItem getRootFolder() {
-        return rootFolder;
+        return getTop();
     }
 
     @Override
     public void refreshRootFolder() {
-        refreshList(rootFolder.getPath());
+        refreshList();
+    }
+
+    private void pushFolderOnStack(DropboxItem folder) {
+
+        folderStack.push(folder);
+        refreshList();
+    }
+
+    private DropboxItem getTop () {
+
+        return folderStack.peek();
     }
 }

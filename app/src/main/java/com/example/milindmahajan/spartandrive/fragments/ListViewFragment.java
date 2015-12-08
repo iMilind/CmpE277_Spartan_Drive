@@ -114,6 +114,16 @@ public class ListViewFragment extends Fragment{
 
         return searchMode;
     }
+
+    public void setSearchMode (boolean search) {
+
+        EditText searchEditText = (EditText) parentView.findViewById(R.id.searchField);
+        searchEditText.setText("");
+        hideSoftKeyboard(getActivity(), parentView);
+        searchMode = search;
+        listViewFragmentListener.refreshRootFolder();
+    }
+
     public static void hideSoftKeyboard (Activity activity, View view) {
 
         InputMethodManager imm = (InputMethodManager)activity.getSystemService(Context.INPUT_METHOD_SERVICE);
