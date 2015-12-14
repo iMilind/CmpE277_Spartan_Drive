@@ -90,4 +90,12 @@ public class Common
         }
         return path + "/SpartanDrive";
     }
+
+    public static String getLocalRoot()
+    {
+        String p2 = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
+
+        return p2+"/SpartanDrive";
+    }
 }
