@@ -488,8 +488,8 @@ public class ListViewFragment extends Fragment {
 
                 size.setVisibility(View.INVISIBLE);
                 checkBox.setVisibility(View.INVISIBLE);
-                imageView.setVisibility(View.INVISIBLE);
-                itemInfoToggle.setVisibility(View.INVISIBLE);
+                imageView.setImageResource(R.drawable.back);
+                itemInfoToggle.setText("Back to " + getParentName());
             }
 
             checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -516,6 +516,14 @@ public class ListViewFragment extends Fragment {
             });
 
             return convertView;
+        }
+
+        private String getParentName() {
+
+            String[] folders = listViewFragmentListener.getRootFolder().getPath().split("/");
+            String lastButOne = folders[folders.length-2];
+
+            return lastButOne;
         }
     }
 }
