@@ -844,36 +844,26 @@ public class MainActivity
 
     public void viewFile(final DropboxItem dropboxItem) {
 
-        ShareTask f = (ShareTask) new ShareTask(MainActivity.this, new ShareTask.AsyncResponse() {
+        try {
 
-            @Override
-            public void processFinish(String result) {
+            File file = new File(Common.getLocalRoot() + File.separator + dropboxItem.getName());
+            String type = dropboxItem.getMimeType();
 
-                if (result != null) {
+            if (type == null) {
 
-                    try {
-
-                        File file = new File(Common.getLocalRoot() + File.separator + dropboxItem.getName());
-                        String type = dropboxItem.getMimeType();
-
-                        if (type == null) {
-
-                            type = "*/*";
-                        }
-
-                        Intent intent = new Intent(Intent.ACTION_VIEW);
-                        Uri data = Uri.fromFile(file);
-
-                        intent.setDataAndType(data, type);
-
-                        startActivity(intent);
-                    } catch (Exception exc) {
-
-                        exc.printStackTrace();
-                    }
-                }
+                type = "*/*";
             }
-        }).execute(dropboxItem);
+
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            Uri data = Uri.fromFile(file);
+
+            intent.setDataAndType(data, type);
+
+            startActivity(intent);
+        } catch (Exception exc) {
+
+            exc.printStackTrace();
+        }
     }
 
     public void viewDropboxItem(final DropboxItem dropboxItem) {
