@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Environment;
 
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.android.AndroidAuthSession;
@@ -12,6 +13,7 @@ import com.dropbox.client2.exception.DropboxException;
 import com.dropbox.client2.session.Session;
 import com.example.milindmahajan.spartandrive.activities.MainActivity;
 
+import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -73,5 +75,19 @@ public class Common
     public static String getRootDIR()
     {
         return rootDIR;
+    }
+
+
+    public static String getPath() {
+        String path = "";
+        if (Environment.getExternalStorageState().equals(
+                Environment.MEDIA_MOUNTED)) {
+            path = Environment.getExternalStorageDirectory().getAbsolutePath();
+        } else if ((new File("/mnt/emmc")).exists()) {
+            path = "/mnt/emmc";
+        } else {
+            path = Environment.getExternalStorageDirectory().getAbsolutePath();
+        }
+        return path + "/SpartanDrive";
     }
 }
