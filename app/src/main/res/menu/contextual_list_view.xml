@@ -20,14 +20,6 @@
     </item>
 
     <item
-        android:id="@+id/item_download"
-        android:icon="@android:drawable/ic_menu_save"
-        yourapp:showAsAction="ifRoom"
-        android:titleCondensed="Download"
-        android:title="Download">
-    </item>
-
-    <item
         android:id="@+id/item_move"
         android:icon="@drawable/move"
         yourapp:showAsAction="ifRoom"

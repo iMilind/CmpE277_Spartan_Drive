@@ -242,15 +242,7 @@ public class ListViewFragment extends Fragment {
 
             case CONTEXTMENU_OPTION_VIEW:
 
-                Context c = getContext();
-                DownloadFile f = new DownloadFile(c, dropboxItems.get(contextMenuInfo.position), new DownloadFile.AsyncResponse() {
-                    @Override
-                    public void processFinish(boolean result) {
-
-                        listViewFragmentListener.viewDropboxItem(dropboxItems.get(contextMenuInfo.position));
-                    }
-                });
-                f.execute();
+                listViewFragmentListener.viewDropboxItem(dropboxItems.get(contextMenuInfo.position));
                 break;
 
             case CONTEXTMENU_OPTION_DELETE:
@@ -308,15 +300,7 @@ public class ListViewFragment extends Fragment {
                     listViewFragmentListener.backPressed();
                 } else {
 
-                    Context c = getContext();
-                    DownloadFile f = new DownloadFile(c, dropboxItems.get(pos), new DownloadFile.AsyncResponse() {
-                        @Override
-                        public void processFinish(boolean result) {
-
-                            listViewFragmentListener.viewDropboxItem(dropboxItems.get(pos));
-                        }
-                    });
-                    f.execute();
+                    listViewFragmentListener.viewDropboxItem(dropboxItems.get(pos));
                 }
             }
         });

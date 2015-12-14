@@ -36,6 +36,7 @@ import com.example.milindmahajan.spartandrive.model.DropboxItem;
 import com.example.milindmahajan.spartandrive.singletons.ApplicationSettings;
 import com.example.milindmahajan.spartandrive.utils.AccountInfoTask;
 import com.example.milindmahajan.spartandrive.utils.Common;
+import com.example.milindmahajan.spartandrive.utils.DownloadFile;
 import com.example.milindmahajan.spartandrive.utils.FileTasks;
 import com.example.milindmahajan.spartandrive.utils.ListFilesTask;
 import com.example.milindmahajan.spartandrive.utils.ShareTask;
@@ -525,11 +526,6 @@ public class MainActivity
                     mode.finish();
                     return true;
 
-                case R.id.item_download:
-
-                    mode.finish();
-                    return true;
-
                 case R.id.item_move:
 
                     startFolderSelectionIntent(listViewFragment.selectedDropboxItems(), FOLDER_SELECT_ACTIVITY_RESULT_MOVE);
@@ -875,10 +871,6 @@ public class MainActivity
 
                         exc.printStackTrace();
                     }
-//                    dropboxItem.setShareLink(result);
-//                    Intent filePreviewIntent = new Intent(getApplicationContext(), FilePreviewActivity.class);
-//                    filePreviewIntent.putExtra("dropboxItem", dropboxItem);
-//                    startActivity(filePreviewIntent);
                 }
             }
         }).execute(dropboxItem);
@@ -892,7 +884,14 @@ public class MainActivity
 
         } else {
 
-            viewFile(dropboxItem);
+            DownloadFile f = new DownloadFile(MainActivity.this, dropboxItem, new DownloadFile.AsyncResponse() {
+                @Override
+                public void processFinish(boolean result) {
+
+                    viewFile(dropboxItem);
+                }
+            });
+            f.execute();
         }
     }
 
