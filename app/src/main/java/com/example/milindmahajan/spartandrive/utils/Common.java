@@ -21,8 +21,8 @@ import java.util.ArrayList;
  */
 public class Common
 {
-    final static public String APP_KEY = "ng6nw88gthunoyx";
-    final static public String APP_SECRET = "qlh6xb7urnhcw6m";
+    final static public String APP_KEY = "xxxx";
+    final static public String APP_SECRET = "xxxx";
 
     final static public String ACCOUNT_PREFS_NAME = "prefs";
     final static public String ACCESS_KEY_NAME = "ACCESS_KEY";
