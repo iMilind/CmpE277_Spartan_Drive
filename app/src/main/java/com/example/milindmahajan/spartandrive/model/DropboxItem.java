@@ -22,7 +22,15 @@ public class DropboxItem implements Parcelable, Comparator<DropboxItem> {
     String parentPath;
     String size;
     String extension;
+    String rev;
 
+    public String getRev() {
+        return rev;
+    }
+
+    public void setRev(String rev) {
+        this.rev = rev;
+    }
 
     public DropboxItem() {
 
@@ -37,6 +45,7 @@ public class DropboxItem implements Parcelable, Comparator<DropboxItem> {
         this.setModified(entry.modified);
         this.setParentPath(entry.parentPath());
         this.setSize(entry.size);
+        this.setRev(entry.rev);
     }
 
     public void setName(String name) {

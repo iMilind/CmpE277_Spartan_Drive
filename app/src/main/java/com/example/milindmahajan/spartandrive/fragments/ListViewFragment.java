@@ -30,6 +30,7 @@ import android.widget.TextView;
 import com.dropbox.client2.DropboxAPI;
 import com.example.milindmahajan.spartandrive.R;
 import com.example.milindmahajan.spartandrive.model.DropboxItem;
+import com.example.milindmahajan.spartandrive.utils.DownloadFile;
 import com.example.milindmahajan.spartandrive.utils.SearchTask;
 
 import java.io.File;
@@ -261,7 +262,9 @@ public class ListViewFragment extends Fragment {
                 break;
 
             case CONTEXTMENU_OPTION_DOWNLOAD:
-
+                Context c = getContext();
+                DownloadFile f = new DownloadFile(c, dropboxItems.get(contextMenuInfo.position));
+                f.execute();
                 break;
 
             case CONTEXTMENU_OPTION_MOVE:
