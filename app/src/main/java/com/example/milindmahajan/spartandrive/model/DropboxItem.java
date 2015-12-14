@@ -23,6 +23,15 @@ public class DropboxItem implements Parcelable, Comparator<DropboxItem> {
     String size;
     String extension;
     String rev;
+    String mimeType;
+
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+    }
+
+    public String getMimeType() {
+        return mimeType;
+    }
 
     public String getRev() {
         return rev;
@@ -46,6 +55,7 @@ public class DropboxItem implements Parcelable, Comparator<DropboxItem> {
         this.setParentPath(entry.parentPath());
         this.setSize(entry.size);
         this.setRev(entry.rev);
+        this.setMimeType(entry.mimeType);
     }
 
     public void setName(String name) {
@@ -217,6 +227,7 @@ public class DropboxItem implements Parcelable, Comparator<DropboxItem> {
         parcel.writeString(parentPath);
         parcel.writeString(size);
         parcel.writeString(extension);
+        parcel.writeString(mimeType);
     }
 
     public static final Parcelable.Creator<DropboxItem> CREATOR = new Creator<DropboxItem>() {
@@ -233,6 +244,7 @@ public class DropboxItem implements Parcelable, Comparator<DropboxItem> {
             dropboxItem.setParentPath(source.readString());
             dropboxItem.setSize(source.readString());
             dropboxItem.setExtension(source.readString());
+            dropboxItem.setMimeType(source.readString());
 
             return dropboxItem;
         }

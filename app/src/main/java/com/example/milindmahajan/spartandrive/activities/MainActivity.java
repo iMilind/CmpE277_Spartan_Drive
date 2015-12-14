@@ -855,10 +855,30 @@ public class MainActivity
 
                 if (result != null) {
 
-                    dropboxItem.setShareLink(result);
-                    Intent filePreviewIntent = new Intent(getApplicationContext(), FilePreviewActivity.class);
-                    filePreviewIntent.putExtra("dropboxItem", dropboxItem);
-                    startActivity(filePreviewIntent);
+                    try {
+
+                        File file = new File(Common.getLocalRoot() + File.separator + dropboxItem.getName());
+                        String type = dropboxItem.getMimeType();
+
+                        if (type == null) {
+
+                            type = "*/*";
+                        }
+
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        Uri data = Uri.fromFile(file);
+
+                        intent.setDataAndType(data, type);
+
+                        startActivity(intent);
+                    } catch (Exception exc) {
+
+                        exc.printStackTrace();
+                    }
+//                    dropboxItem.setShareLink(result);
+//                    Intent filePreviewIntent = new Intent(getApplicationContext(), FilePreviewActivity.class);
+//                    filePreviewIntent.putExtra("dropboxItem", dropboxItem);
+//                    startActivity(filePreviewIntent);
                 }
             }
         }).execute(dropboxItem);

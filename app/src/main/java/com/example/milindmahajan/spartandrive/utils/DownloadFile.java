@@ -25,6 +25,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 /**
  * Created by Jatin on 12/13/2015.
@@ -38,12 +39,21 @@ public class DownloadFile extends AsyncTask<Void, Long, Boolean>{
     private String mErrorMsg;
     DropboxItem item;
     private long mFileLen;
-    public DownloadFile(Context c, DropboxItem d)
+    AsyncResponse response;
+
+
+    public interface AsyncResponse {
+
+        void processFinish(boolean result);
+    }
+
+    public DownloadFile(Context c, DropboxItem d, AsyncResponse response)
     {
         mContext = c;
         item = d;
         mFileLen = 1000;
         mApi = Common.getDropboxObj();
+        this.response = response;
     }
 
     @Override
@@ -57,7 +67,10 @@ public class DownloadFile extends AsyncTask<Void, Long, Boolean>{
         }
         File localFile = new File(rootDirect.getPath(), item.getName());
 
-        copy(item, localFile);
+        if (!localFile.exists()) {
+
+            copy(item, localFile);
+        }
         return Boolean.TRUE;
     }
 
@@ -65,8 +78,7 @@ public class DownloadFile extends AsyncTask<Void, Long, Boolean>{
     protected void onPostExecute(Boolean result) {
 
         if (result) {
-            showToast("Successfully Downloaded at "+ Common.getLocalRoot()+
-                    File.separator+item.getName());
+            this.response.processFinish(true);
         } else {
             showToast(mErrorMsg);
         }

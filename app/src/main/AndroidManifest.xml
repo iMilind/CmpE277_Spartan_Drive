@@ -38,10 +38,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.FilePreviewActivity"
-            android:label="@string/title_activity_file_preview" >
-        </activity>
-        <activity
             android:name=".activities.FolderSelectionActivity"
             android:label="@string/title_activity_folder_selection" >
         </activity>

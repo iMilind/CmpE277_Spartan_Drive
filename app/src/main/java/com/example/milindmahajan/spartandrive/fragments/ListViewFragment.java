@@ -52,11 +52,10 @@ public class ListViewFragment extends Fragment {
     private static final int CONTEXTMENU_OPTION_SHARE = 3;
     private static boolean searchMode;
 
-    private static final int CONTEXTMENU_OPTION_DOWNLOAD = 4;
-    private static final int CONTEXTMENU_OPTION_MOVE = 5;
-    private static final int CONTEXTMENU_OPTION_COPY = 6;
-    private static final int CONTEXTMENU_OPTION_RENAME = 7;
-    private static final int CONTEXTMENU_OPTION_CANCEL = 8;
+    private static final int CONTEXTMENU_OPTION_MOVE = 4;
+    private static final int CONTEXTMENU_OPTION_COPY = 5;
+    private static final int CONTEXTMENU_OPTION_RENAME = 6;
+    private static final int CONTEXTMENU_OPTION_CANCEL = 7;
 
     ListViewFragmentProtocol listViewFragmentListener;
 
@@ -227,7 +226,6 @@ public class ListViewFragment extends Fragment {
             menu.add(Menu.NONE, CONTEXTMENU_OPTION_VIEW, 0, "View");
             menu.add(Menu.NONE, CONTEXTMENU_OPTION_DELETE, 1, "Delete");
             menu.add(Menu.NONE, CONTEXTMENU_OPTION_SHARE, 2, "Share");
-            menu.add(Menu.NONE, CONTEXTMENU_OPTION_DOWNLOAD, 3, "Download");
             menu.add(Menu.NONE, CONTEXTMENU_OPTION_MOVE, 4, "Move");
             menu.add(Menu.NONE, CONTEXTMENU_OPTION_COPY, 5, "Copy");
             menu.add(Menu.NONE, CONTEXTMENU_OPTION_RENAME, 6, "Rename");
@@ -238,13 +236,21 @@ public class ListViewFragment extends Fragment {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
 
-        AdapterView.AdapterContextMenuInfo contextMenuInfo = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
+        final AdapterView.AdapterContextMenuInfo contextMenuInfo = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
 
         switch (item.getItemId()) {
 
             case CONTEXTMENU_OPTION_VIEW:
 
-                listViewFragmentListener.viewDropboxItem(dropboxItems.get(contextMenuInfo.position));
+                Context c = getContext();
+                DownloadFile f = new DownloadFile(c, dropboxItems.get(contextMenuInfo.position), new DownloadFile.AsyncResponse() {
+                    @Override
+                    public void processFinish(boolean result) {
+
+                        listViewFragmentListener.viewDropboxItem(dropboxItems.get(contextMenuInfo.position));
+                    }
+                });
+                f.execute();
                 break;
 
             case CONTEXTMENU_OPTION_DELETE:
@@ -259,12 +265,6 @@ public class ListViewFragment extends Fragment {
                 ArrayList <DropboxItem> selectedItemToShare = new ArrayList<DropboxItem>();
                 selectedItemToShare.add(this.dropboxItems.get(contextMenuInfo.position));
                 listViewFragmentListener.shareFromDropbox(selectedItemToShare);
-                break;
-
-            case CONTEXTMENU_OPTION_DOWNLOAD:
-                Context c = getContext();
-                DownloadFile f = new DownloadFile(c, dropboxItems.get(contextMenuInfo.position));
-                f.execute();
                 break;
 
             case CONTEXTMENU_OPTION_MOVE:
@@ -300,7 +300,7 @@ public class ListViewFragment extends Fragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
-            public void onItemClick(AdapterView<?> av, View v, int pos,
+            public void onItemClick(AdapterView<?> av, View v, final int pos,
                                     long id) {
 
                 if (dropboxItems.get(pos).getName().equalsIgnoreCase("...")) {
@@ -308,7 +308,15 @@ public class ListViewFragment extends Fragment {
                     listViewFragmentListener.backPressed();
                 } else {
 
-                    listViewFragmentListener.viewDropboxItem(dropboxItems.get(pos));
+                    Context c = getContext();
+                    DownloadFile f = new DownloadFile(c, dropboxItems.get(pos), new DownloadFile.AsyncResponse() {
+                        @Override
+                        public void processFinish(boolean result) {
+
+                            listViewFragmentListener.viewDropboxItem(dropboxItems.get(pos));
+                        }
+                    });
+                    f.execute();
                 }
             }
         });
